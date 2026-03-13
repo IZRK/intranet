@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
 import { useLanguageStore } from 'stores/language-store'
+import { useThemeStore } from 'stores/theme-store'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -22,6 +23,7 @@ export const useAuthStore = defineStore('auth', {
         this.user = data.user
         window.localStorage.setItem('izrk.jwt', data.token)
         useLanguageStore().applyBackendLanguage(data.user.lang)
+        useThemeStore().applyBackendTheme(data.user.theme)
         return data
       } finally {
         this.loading = false
@@ -38,6 +40,7 @@ export const useAuthStore = defineStore('auth', {
         const { data } = await api.get('auth/me')
         this.user = data.user
         useLanguageStore().applyBackendLanguage(data.user.lang)
+        useThemeStore().applyBackendTheme(data.user.theme)
         return data.user
       } catch {
         this.clear()

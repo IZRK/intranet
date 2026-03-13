@@ -4,6 +4,8 @@ export default {
     institute: 'Karst Research Institute ZRC SAZU',
     logout: 'Log out',
     language: 'Language',
+    themeDark: 'Dark mode',
+    themeLight: 'Light mode',
     languages: {
       sl: 'Slovenian',
       en: 'English',

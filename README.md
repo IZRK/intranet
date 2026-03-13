@@ -1,6 +1,6 @@
 # IZRK Intranet Frontend
 
-Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 4, and a shared dark-mode visual system tuned for the IZRK intranet workflows.
+Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 4, and a shared dual-theme visual system tuned for the IZRK intranet workflows.
 
 ## Features
 
@@ -9,6 +9,8 @@ Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue R
 - Stateless axios client that always sends `Authorization: Bearer <token>`
 - Slovenian primary UI with English secondary UI via i18n
 - Language switching persisted in local storage and in the backend for logged-in users
+- Light and dark theme switching with explicit theme tokens for both modes
+- Theme preference persisted in local storage and in the backend for logged-in users
 - Password reset flow with dedicated screens and reset-mail routing
 - Editable `Aktualno` bulletin-board homepage with:
   - rich HTML editing via `q-editor`
@@ -57,6 +59,7 @@ npm run build
 - [src/stores/bulletin-store.js](/app/intranet/fe/src/stores/bulletin-store.js)
 - [src/stores/language-store.js](/app/intranet/fe/src/stores/language-store.js)
 - [src/stores/messaging-store.js](/app/intranet/fe/src/stores/messaging-store.js)
+- [src/stores/theme-store.js](/app/intranet/fe/src/stores/theme-store.js)
 - [src/layouts/MainLayout.vue](/app/intranet/fe/src/layouts/MainLayout.vue)
 - [src/pages/HomePage.vue](/app/intranet/fe/src/pages/HomePage.vue)
 - [src/pages/LoginPage.vue](/app/intranet/fe/src/pages/LoginPage.vue)

@@ -8,6 +8,7 @@ import {
 import routes from './routes'
 import { useAuthStore } from 'stores/auth-store'
 import { useLanguageStore } from 'stores/language-store'
+import { useThemeStore } from 'stores/theme-store'
 
 /*
  * If not building with SSR mode, you can
@@ -38,8 +39,10 @@ export default defineRouter(function () {
   Router.beforeEach(async (to) => {
     const auth = useAuthStore()
     const language = useLanguageStore()
+    const theme = useThemeStore()
 
     language.initialize()
+    theme.initialize()
 
     if (auth.token && !auth.user && !auth.loading) {
       await auth.bootstrap()

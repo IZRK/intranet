@@ -41,10 +41,10 @@
 
         <template v-else>
           <q-card-section v-if="messaging.error" class="q-pb-none">
-            <q-banner rounded class="bg-negative text-white">
+            <q-banner rounded class="status-banner status-banner-danger">
               {{ $t('messaging.loadError') }}
               <template #action>
-                <q-btn flat color="white" :label="$t('messaging.refresh')" @click="messaging.load" />
+                <q-btn flat color="primary" :label="$t('messaging.refresh')" @click="messaging.load" />
               </template>
             </q-banner>
           </q-card-section>
@@ -185,7 +185,7 @@
             @click="sendMessage"
           />
           <div aria-live="polite" aria-atomic="true">
-            <q-banner v-if="delivery" rounded class="bg-positive text-white">
+            <q-banner v-if="delivery" rounded class="status-banner status-banner-success">
               {{ $t('messaging.deliveryInfo', { count: delivery.recipient_count, group: delivery.group, method: delivery.method }) }}
             </q-banner>
           </div>

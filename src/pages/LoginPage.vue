@@ -9,7 +9,10 @@
               <div class="auth-overline">{{ $t('auth.loginOverline') }}</div>
               <h1 class="auth-title">{{ $t('auth.loginTitle') }}</h1>
             </div>
-            <LanguageSwitcher class="language-switcher" />
+            <div class="auth-topbar-actions">
+              <ThemeToggle />
+              <LanguageSwitcher class="language-switcher" />
+            </div>
           </div>
           <p class="auth-text">
             {{ showingResetRequest ? $t('auth.resetRequestText') : $t('auth.loginText') }}
@@ -77,11 +80,13 @@ import { Notify } from 'quasar'
 import { i18n } from 'boot/i18n'
 import { useAuthStore } from 'stores/auth-store'
 import LanguageSwitcher from 'components/LanguageSwitcher.vue'
+import ThemeToggle from 'components/ThemeToggle.vue'
 
 export default defineComponent({
   name: 'LoginPage',
   components: {
     LanguageSwitcher,
+    ThemeToggle,
   },
   data() {
     return {

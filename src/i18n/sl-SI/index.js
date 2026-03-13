@@ -4,6 +4,8 @@ export default {
     institute: 'Inštitut za raziskovanje krasa ZRC SAZU',
     logout: 'Odjava',
     language: 'Jezik',
+    themeDark: 'Temni način',
+    themeLight: 'Svetli način',
     languages: {
       sl: 'Slovenščina',
       en: 'English',

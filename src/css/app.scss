@@ -2,32 +2,97 @@
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-ui: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
 
-  --app-bg: #f5f7fa;
-  --app-surface: #ffffff;
-  --app-border: #d9e0e7;
-  --app-text: #1f2933;
-  --app-muted: #52606d;
-  --app-primary: #0b5ea8;
+  --app-bg: #f3f1ea;
+  --app-bg-elevated: #ebe7dd;
+  --app-surface: #fffdf8;
+  --app-surface-strong: #f8f3e7;
+  --app-border: #d5cec0;
+  --app-text: #1f2430;
+  --app-muted: #646d7a;
+  --app-primary: #235fa4;
+  --app-link: #215791;
+  --app-shadow: rgba(90, 69, 34, 0.12);
+  --app-shadow-strong: rgba(65, 49, 22, 0.18);
+  --surface-field-bg: rgba(255, 250, 241, 0.92);
+  --surface-field-autofill-bg: #f6e6c9;
+  --surface-field-autofill-text: #1b2430;
+  --app-success-bg: color-mix(in srgb, #2b8a57 16%, var(--app-surface));
+  --app-success-border: color-mix(in srgb, #2b8a57 36%, var(--app-border));
+  --app-success-text: #1b5a3c;
+  --app-danger-bg: color-mix(in srgb, #b7435c 14%, var(--app-surface));
+  --app-danger-border: color-mix(in srgb, #b7435c 34%, var(--app-border));
+  --app-danger-text: #7f2037;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --app-bg: #111827;
+    --app-bg-elevated: #162033;
     --app-surface: #1f2937;
+    --app-surface-strong: #243041;
     --app-border: #374151;
     --app-text: #f9fafb;
     --app-muted: #9ca3af;
     --app-primary: #93c5fd;
+    --app-link: #b9d8ff;
+    --app-shadow: rgba(0, 10, 24, 0.38);
+    --app-shadow-strong: rgba(0, 8, 20, 0.52);
+    --surface-field-bg: rgba(5, 14, 31, 0.28);
+    --surface-field-autofill-bg: #b7c0cf;
+    --surface-field-autofill-text: #0f172a;
+    --app-success-bg: color-mix(in srgb, #1f9d55 16%, var(--app-surface));
+    --app-success-border: color-mix(in srgb, #2dc16d 32%, var(--app-border));
+    --app-success-text: #d9f9e5;
+    --app-danger-bg: color-mix(in srgb, #cf3f5b 16%, var(--app-surface));
+    --app-danger-border: color-mix(in srgb, #f36b86 30%, var(--app-border));
+    --app-danger-text: #ffe0e7;
   }
+}
+
+.body--light {
+  --app-bg: #f3f1ea;
+  --app-bg-elevated: #ebe7dd;
+  --app-surface: #fffdf8;
+  --app-surface-strong: #f8f3e7;
+  --app-border: #d5cec0;
+  --app-text: #1f2430;
+  --app-muted: #646d7a;
+  --app-primary: #235fa4;
+  --app-link: #215791;
+  --app-shadow: rgba(90, 69, 34, 0.12);
+  --app-shadow-strong: rgba(65, 49, 22, 0.18);
+  --surface-field-bg: rgba(255, 250, 241, 0.92);
+  --surface-field-autofill-bg: #f6e6c9;
+  --surface-field-autofill-text: #1b2430;
+  --app-success-bg: color-mix(in srgb, #2b8a57 16%, var(--app-surface));
+  --app-success-border: color-mix(in srgb, #2b8a57 36%, var(--app-border));
+  --app-success-text: #1b5a3c;
+  --app-danger-bg: color-mix(in srgb, #b7435c 14%, var(--app-surface));
+  --app-danger-border: color-mix(in srgb, #b7435c 34%, var(--app-border));
+  --app-danger-text: #7f2037;
 }
 
 .body--dark {
   --app-bg: #111827;
+  --app-bg-elevated: #162033;
   --app-surface: #1f2937;
+  --app-surface-strong: #243041;
   --app-border: #374151;
   --app-text: #f9fafb;
   --app-muted: #9ca3af;
   --app-primary: #93c5fd;
+  --app-link: #b9d8ff;
+  --app-shadow: rgba(0, 10, 24, 0.38);
+  --app-shadow-strong: rgba(0, 8, 20, 0.52);
+  --surface-field-bg: rgba(5, 14, 31, 0.28);
+  --surface-field-autofill-bg: #b7c0cf;
+  --surface-field-autofill-text: #0f172a;
+  --app-success-bg: color-mix(in srgb, #1f9d55 16%, var(--app-surface));
+  --app-success-border: color-mix(in srgb, #2dc16d 32%, var(--app-border));
+  --app-success-text: #d9f9e5;
+  --app-danger-bg: color-mix(in srgb, #cf3f5b 16%, var(--app-surface));
+  --app-danger-border: color-mix(in srgb, #f36b86 30%, var(--app-border));
+  --app-danger-text: #ffe0e7;
 }
 
 body {
@@ -73,7 +138,7 @@ body {
   height: 48px;
   object-fit: contain;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
+  background: color-mix(in srgb, var(--app-surface) 90%, white 10%);
 }
 
 .brand-title {
@@ -118,6 +183,20 @@ body {
   color: var(--app-text);
   background: color-mix(in srgb, var(--app-surface) 84%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+}
+
+.theme-toggle {
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-surface) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  background: color-mix(in srgb, var(--app-primary) 18%, var(--app-surface));
 }
 
 .language-toggle:hover,
@@ -286,7 +365,7 @@ body {
 }
 
 .history-body {
-  background: color-mix(in srgb, var(--app-bg) 40%, transparent);
+  background: color-mix(in srgb, var(--app-bg-elevated) 68%, var(--app-surface));
 }
 
 .history-subject {
@@ -365,7 +444,11 @@ body {
 }
 
 .bulletin-html a {
-  color: var(--app-primary);
+  color: var(--app-link);
+}
+
+.history-message a {
+  color: var(--app-link);
 }
 
 .bulletin-html blockquote {
@@ -413,11 +496,11 @@ body {
 }
 
 .diff-row-added td {
-  background: color-mix(in srgb, #1f9d55 16%, transparent);
+  background: var(--app-success-bg);
 }
 
 .diff-row-removed td {
-  background: color-mix(in srgb, #cf3f5b 16%, transparent);
+  background: var(--app-danger-bg);
 }
 
 /* =====================
@@ -428,10 +511,10 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px rgba(5, 14, 31, 0.28) inset !important;
-  box-shadow: 0 0 0 1000px rgba(5, 14, 31, 0.28) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-field-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--surface-field-bg) inset !important;
   -webkit-text-fill-color: var(--app-text) !important;
-  background-color: rgba(5, 14, 31, 0.28) !important;
+  background-color: var(--surface-field-bg) !important;
   background-image: none !important;
   caret-color: var(--app-text);
   transition: background-color 9999s ease-in-out 0s;
@@ -449,8 +532,9 @@ input:-webkit-autofill:active {
   min-height: 100vh;
   padding: 24px;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--app-primary) 20%, transparent), transparent 34%),
-    linear-gradient(160deg, color-mix(in srgb, var(--app-bg) 72%, #001631 28%), var(--app-bg));
+    radial-gradient(circle at top left, color-mix(in srgb, var(--app-primary) 18%, transparent), transparent 34%),
+    radial-gradient(circle at bottom right, color-mix(in srgb, var(--app-border) 46%, transparent), transparent 42%),
+    linear-gradient(160deg, color-mix(in srgb, var(--app-bg) 76%, var(--app-bg-elevated) 24%), var(--app-bg));
 }
 
 .auth-card-wrap {
@@ -465,7 +549,7 @@ input:-webkit-autofill:active {
 .auth-card {
   border: 1px solid color-mix(in srgb, var(--app-border) 82%, transparent);
   background: color-mix(in srgb, var(--app-surface) 92%, transparent);
-  box-shadow: 0 24px 80px rgba(0, 18, 43, 0.26);
+  box-shadow: 0 24px 80px var(--app-shadow-strong);
   backdrop-filter: blur(18px);
 }
 
@@ -474,6 +558,12 @@ input:-webkit-autofill:active {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.auth-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .auth-overline {
@@ -505,8 +595,8 @@ input:-webkit-autofill:active {
   object-fit: contain;
   margin-bottom: 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 30px rgba(0, 10, 24, 0.22);
+  background: color-mix(in srgb, var(--app-surface) 90%, white 10%);
+  box-shadow: 0 10px 30px var(--app-shadow);
 }
 
 .auth-form-shell {
@@ -572,10 +662,6 @@ input:-webkit-autofill:active {
 
 .panel-card,
 .auth-card {
-  --surface-field-bg: rgba(5, 14, 31, 0.28);
-  --surface-field-autofill-bg: #b7c0cf;
-  --surface-field-autofill-text: #0f172a;
-
   .q-field__control,
   .q-field__marginal,
   .q-field__native,
@@ -638,7 +724,7 @@ input:-webkit-autofill:active {
   }
 
   .q-editor__toolbars-container {
-    background: color-mix(in srgb, var(--app-bg) 55%, var(--app-surface));
+    background: color-mix(in srgb, var(--app-bg-elevated) 55%, var(--app-surface));
     border-bottom: 1px solid color-mix(in srgb, var(--app-border) 84%, transparent);
   }
 
@@ -656,9 +742,10 @@ input:-webkit-autofill:active {
 .q-menu,
 .q-dialog__inner > div,
 .q-select__dialog {
-  background: color-mix(in srgb, var(--app-surface) 96%, #091426 4%);
+  background: color-mix(in srgb, var(--app-surface) 96%, var(--app-bg-elevated) 4%);
   color: var(--app-text);
   border: 1px solid color-mix(in srgb, var(--app-border) 84%, transparent);
+  box-shadow: 0 18px 50px var(--app-shadow);
 }
 
 .q-menu .q-item,
@@ -697,6 +784,22 @@ input:-webkit-autofill:active {
   transition: background-color 99999s ease-in-out 0s;
   caret-color: var(--surface-field-autofill-text);
   border-radius: 0 !important;
+}
+
+.status-banner {
+  border: 1px solid transparent;
+}
+
+.status-banner-danger {
+  background: var(--app-danger-bg);
+  border-color: var(--app-danger-border);
+  color: var(--app-danger-text);
+}
+
+.status-banner-success {
+  background: var(--app-success-bg);
+  border-color: var(--app-success-border);
+  color: var(--app-success-text);
 }
 
 /* =====================

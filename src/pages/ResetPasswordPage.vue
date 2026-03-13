@@ -8,7 +8,10 @@
               <div class="auth-overline">{{ $t('auth.resetOverline') }}</div>
               <h1 class="auth-title">{{ $t('auth.resetPageTitle') }}</h1>
             </div>
-            <LanguageSwitcher class="language-switcher" />
+            <div class="auth-topbar-actions">
+              <ThemeToggle />
+              <LanguageSwitcher class="language-switcher" />
+            </div>
           </div>
           <p class="auth-text">{{ $t('auth.resetPageText') }}</p>
         </q-card-section>
@@ -54,11 +57,13 @@ import { Notify } from 'quasar'
 import { useAuthStore } from 'stores/auth-store'
 import { i18n } from 'boot/i18n'
 import LanguageSwitcher from 'components/LanguageSwitcher.vue'
+import ThemeToggle from 'components/ThemeToggle.vue'
 
 export default defineComponent({
   name: 'ResetPasswordPage',
   components: {
     LanguageSwitcher,
+    ThemeToggle,
   },
   data() {
     return {

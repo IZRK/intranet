@@ -9,6 +9,7 @@
         </div>
         <div class="toolbar-spacer" />
         <div class="user-block">
+          <ThemeToggle />
           <LanguageSwitcher class="language-switcher app-language-switcher" />
           <div class="user-name">{{ auth.user?.name }}</div>
           <q-btn flat no-caps color="primary" :label="$t('app.logout')" @click="logout" />
@@ -36,11 +37,13 @@
 import { defineComponent } from 'vue'
 import { useAuthStore } from 'stores/auth-store'
 import LanguageSwitcher from 'components/LanguageSwitcher.vue'
+import ThemeToggle from 'components/ThemeToggle.vue'
 
 export default defineComponent({
   name: 'MainLayout',
   components: {
     LanguageSwitcher,
+    ThemeToggle,
   },
   data() {
     return {
