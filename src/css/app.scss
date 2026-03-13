@@ -246,9 +246,12 @@ body {
    PAGE LAYOUT
    ===================== */
 
-.page-container,
+.page-container {
+  padding: 0 24px;
+}
+
 .page-wrap {
-  padding: 24px;
+  padding: 24px 0;
 }
 
 .content-header {
@@ -443,12 +446,25 @@ body {
   margin: 0 0 1em;
 }
 
-.bulletin-html a {
+.bulletin-html a,
+.bulletin-html a:visited,
+.bulletin-html a *,
+.history-message a,
+.history-message a:visited,
+.history-message a * {
   color: var(--app-link);
 }
 
-.history-message a {
-  color: var(--app-link);
+.bulletin-html a,
+.bulletin-html a:visited,
+.history-message a,
+.history-message a:visited {
+  text-decoration-color: color-mix(in srgb, var(--app-link) 60%, transparent);
+}
+
+.bulletin-html a *,
+.history-message a * {
+  color: inherit !important;
 }
 
 .bulletin-html blockquote {
@@ -843,8 +859,7 @@ input:-webkit-autofill:active {
 
 @media (max-width: 640px) {
   .app-toolbar,
-  .page-container,
-  .page-wrap {
+  .page-container {
     padding-left: 16px;
     padding-right: 16px;
   }

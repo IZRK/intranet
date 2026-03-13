@@ -14,6 +14,7 @@ Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue R
 - Password reset flow with dedicated screens and reset-mail routing
 - Editable `Aktualno` bulletin-board homepage with:
   - rich HTML editing via `q-editor`
+  - theme-aware rendering for bulletin content, including readable hyperlinks in both light and dark mode
   - persisted revision history
   - revision summaries and expandable full diffs
 - `Obveščanje` workspace for:
