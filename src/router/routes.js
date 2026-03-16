@@ -25,6 +25,13 @@ const routes = [
       { path: '', name: 'home', component: () => import('pages/HomePage.vue') },
       { path: 'obvescanje', name: 'obvescanje', component: () => import('pages/ObvescanjePage.vue') },
       { path: 'rezervacije', name: 'rezervacije', component: () => import('pages/RezervacijePage.vue') },
+      { path: 'profil', name: 'profile', component: () => import('pages/ProfilePage.vue') },
+      {
+        path: 'uporabniki',
+        name: 'users-admin',
+        component: () => import('pages/UsersAdminPage.vue'),
+        meta: { adminOnly: true },
+      },
     ],
   },
   {

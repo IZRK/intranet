@@ -12,18 +12,28 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => Boolean(state.token && state.user),
+    isAdmin: (state) => Boolean(state.user?.role?.includes('admin')),
   },
 
   actions: {
+    applySession(payload) {
+      if (payload?.token) {
+        this.token = payload.token
+        window.localStorage.setItem('izrk.jwt', payload.token)
+      }
+
+      if (payload?.user) {
+        this.user = payload.user
+        useLanguageStore().applyBackendLanguage(payload.user.lang)
+        useThemeStore().applyBackendTheme(payload.user.theme)
+      }
+    },
+
     async login(credentials) {
       this.loading = true
       try {
         const { data } = await api.post('auth/login', credentials)
-        this.token = data.token
-        this.user = data.user
-        window.localStorage.setItem('izrk.jwt', data.token)
-        useLanguageStore().applyBackendLanguage(data.user.lang)
-        useThemeStore().applyBackendTheme(data.user.theme)
+        this.applySession(data)
         return data
       } finally {
         this.loading = false
@@ -38,9 +48,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       try {
         const { data } = await api.get('auth/me')
-        this.user = data.user
-        useLanguageStore().applyBackendLanguage(data.user.lang)
-        useThemeStore().applyBackendTheme(data.user.theme)
+        this.applySession({ user: data.user })
         return data.user
       } catch {
         this.clear()

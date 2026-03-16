@@ -52,6 +52,10 @@ export default defineRouter(function () {
       return { name: 'login' }
     }
 
+    if (to.meta.adminOnly && !auth.isAdmin) {
+      return { name: 'home' }
+    }
+
     if (to.meta.guestOnly && auth.isAuthenticated) {
       return { name: 'home' }
     }

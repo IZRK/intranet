@@ -4,8 +4,10 @@
       <q-toolbar class="app-toolbar">
         <div class="brand">
           <img :src="logoSrc" alt="IZRK" class="brand-logo" />
-          <div class="brand-title">{{ $t('app.brand') }}</div>
-          <div class="brand-subtitle">{{ $t('app.institute') }}</div>
+          <div class="brand-text">
+            <div class="brand-title">{{ $t('app.brand') }}</div>
+            <div class="brand-subtitle">{{ $t('app.institute') }}</div>
+          </div>
         </div>
         <div class="toolbar-spacer" />
         <div class="user-block">
@@ -17,6 +19,13 @@
                 <q-item v-if="auth.user?.name">
                   <q-item-section>{{ auth.user?.name }}</q-item-section>
                 </q-item>
+                <q-item clickable v-close-popup :to="{ name: 'profile' }">
+                  <q-item-section>{{ $t('app.profile') }}</q-item-section>
+                </q-item>
+                <q-item v-if="auth.isAdmin" clickable v-close-popup :to="{ name: 'users-admin' }">
+                  <q-item-section>{{ $t('app.usersAdmin') }}</q-item-section>
+                </q-item>
+                <q-separator />
                 <q-item clickable v-close-popup @click="logout">
                   <q-item-section>{{ $t('app.logout') }}</q-item-section>
                 </q-item>

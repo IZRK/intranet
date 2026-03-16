@@ -157,9 +157,7 @@
             </div>
             <div class="calendar-toolbar-center">
               <div class="calendar-title">{{ monthLabel }}</div>
-              <div class="calendar-subtitle">
-                {{ visibleCalendarSummary }}
-              </div>
+              <div class="calendar-subtitle">{{ calendarSubtitle }}</div>
             </div>
             <div class="calendar-toolbar-group calendar-view-switch">
               <q-btn-toggle
@@ -588,8 +586,7 @@ export default defineComponent({
     monthLabel() {
       if (this.viewMode === 'week') {
         const first = this.weekDates[0]
-        const last = this.weekDates[this.weekDates.length - 1]
-        return `${this.formatAgendaDate(first)} - ${this.formatAgendaDate(last)}`
+        return this.formatWeekMonth(first)
       }
 
       if (this.viewMode === 'day') {
@@ -600,6 +597,15 @@ export default defineComponent({
         month: 'long',
         year: 'numeric',
       }).format(new Date(`${this.viewDate}T00:00:00`))
+    },
+    calendarSubtitle() {
+      if (this.viewMode === 'week') {
+        const first = this.weekDates[0]
+        const last = this.weekDates[this.weekDates.length - 1]
+        return `${this.formatShortDate(first)} - ${this.formatShortDate(last)}`
+      }
+
+      return this.visibleCalendarSummary
     },
     visibleCalendarSummary() {
       return `${this.visibleCalendarIds.length}/${this.reservations.calendars.length} ${this.$t('reservations.allVisible')}`
@@ -893,6 +899,17 @@ export default defineComponent({
         day: 'numeric',
         month: 'long',
       }).format(new Date(`${date}T00:00:00`))
+    },
+    formatWeekMonth(date) {
+      const label = new Intl.DateTimeFormat(this.$i18n.locale, {
+        month: 'long',
+      }).format(new Date(`${date}T00:00:00`))
+
+      return label.charAt(0).toUpperCase() + label.slice(1)
+    },
+    formatShortDate(date) {
+      const current = parseCalendarDate(date)
+      return `${current.getDate()}.${current.getMonth() + 1}.`
     },
     eventChipStyle(item) {
       return {
@@ -1333,7 +1350,12 @@ export default defineComponent({
   background: color-mix(in srgb, var(--app-bg-elevated) 78%, var(--app-surface));
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
+  text-transform: none;
+}
+
+:deep(.q-calendar-day__head--weekday),
+:deep(.q-calendar-day__head-day-label .ellipsis) {
+  text-transform: none;
 }
 
 :deep(.q-calendar-month__day:hover) {
