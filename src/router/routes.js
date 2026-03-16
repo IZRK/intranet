@@ -24,6 +24,7 @@ const routes = [
     children: [
       { path: '', name: 'home', component: () => import('pages/HomePage.vue') },
       { path: 'obvescanje', name: 'obvescanje', component: () => import('pages/ObvescanjePage.vue') },
+      { path: 'rezervacije', name: 'rezervacije', component: () => import('pages/RezervacijePage.vue') },
     ],
   },
   {

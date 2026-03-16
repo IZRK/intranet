@@ -18,9 +18,7 @@
       <q-tabs align="left" inline-label class="app-tabs">
         <q-route-tab icon="home" :label="$t('app.nav.home')" to="/" exact />
         <q-route-tab icon="campaign" :label="$t('app.nav.messaging')" to="/obvescanje" />
-        <q-tab icon="event_available" :label="$t('app.nav.reservations')" disable aria-disabled="true">
-          <q-tooltip>{{ $t('app.nav.comingSoon') }}</q-tooltip>
-        </q-tab>
+        <q-route-tab icon="event_available" :label="$t('app.nav.reservations')" to="/rezervacije" />
         <q-tab icon="folder_copy" :label="$t('app.nav.documents')" disable aria-disabled="true">
           <q-tooltip>{{ $t('app.nav.comingSoon') }}</q-tooltip>
         </q-tab>
