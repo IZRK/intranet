@@ -19,9 +19,9 @@
           <q-card-section class="q-gutter-sm">
             <div class="panel-title">{{ $t('reservations.sidebarTitle') }}</div>
             <div class="sidebar-actions">
-              <q-btn class="sidebar-action-btn" unelevated color="primary" icon="add" :label="$t('reservations.addCalendar')" @click="openNewCalendarDialog" />
-              <q-btn class="sidebar-action-btn" flat no-caps color="primary" icon="create_new_folder" :label="$t('reservations.addGroup')" @click="openNewGroupDialog" />
-              <q-btn class="sidebar-action-btn" flat no-caps color="primary" icon="event" :label="$t('reservations.addReservation')" @click="openReservationDialog()" />
+              <q-btn class="sidebar-action-btn" stack unelevated color="primary" icon="add" :label="$t('reservations.addCalendar')" @click="openNewCalendarDialog" />
+              <q-btn class="sidebar-action-btn" stack flat no-caps color="primary" icon="create_new_folder" :label="$t('reservations.addGroup')" @click="openNewGroupDialog" />
+              <q-btn class="sidebar-action-btn" stack flat no-caps color="primary" icon="event" :label="$t('reservations.addReservation')" @click="openReservationDialog()" />
             </div>
           </q-card-section>
 
@@ -452,23 +452,45 @@ import { QCalendarDay, QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import { useReservationsStore } from 'stores/reservations-store'
 
 function todayDate() {
-  return new Date().toISOString().slice(0, 10)
+  return formatLocalDate(new Date())
+}
+
+function padDatePart(value) {
+  return String(value).padStart(2, '0')
+}
+
+function formatLocalDate(date) {
+  return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`
+}
+
+function formatLocalDateTime(date) {
+  return `${formatLocalDate(date)} ${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}:${padDatePart(date.getSeconds())}`
+}
+
+function parseCalendarDate(dateString) {
+  return new Date(`${dateString}T12:00:00`)
+}
+
+function shiftDate(dateString, amount) {
+  const date = parseCalendarDate(dateString)
+  date.setDate(date.getDate() + amount)
+  return formatLocalDate(date)
 }
 
 function shiftMonth(dateString, amount) {
-  const date = new Date(`${dateString}T00:00:00`)
+  const date = parseCalendarDate(dateString)
   date.setMonth(date.getMonth() + amount)
-  return date.toISOString().slice(0, 10)
+  return formatLocalDate(date)
 }
 
 function monthRange(dateString) {
-  const date = new Date(`${dateString}T00:00:00`)
+  const date = parseCalendarDate(dateString)
   const start = new Date(date.getFullYear(), date.getMonth(), 1)
   const end = new Date(date.getFullYear(), date.getMonth() + 2, 0, 23, 59, 59)
 
   return {
-    start: start.toISOString().slice(0, 19).replace('T', ' '),
-    end: end.toISOString().slice(0, 19).replace('T', ' '),
+    start: formatLocalDateTime(start),
+    end: formatLocalDateTime(end),
   }
 }
 
@@ -586,14 +608,12 @@ export default defineComponent({
       return this.visibleCalendarIds[0] || this.reservations.calendars[0]?.id || null
     },
     weekDates() {
-      const date = new Date(`${this.viewDate}T00:00:00`)
+      const date = parseCalendarDate(this.viewDate)
       const day = date.getDay()
       const diff = day === 0 ? -6 : 1 - day
       date.setDate(date.getDate() + diff)
       return Array.from({ length: 7 }, (_, index) => {
-        const current = new Date(date)
-        current.setDate(date.getDate() + index)
-        return current.toISOString().slice(0, 10)
+        return shiftDate(formatLocalDate(date), index)
       })
     },
   },
@@ -647,7 +667,13 @@ export default defineComponent({
       this.expandedGroups = nextState
     },
     moveCalendar(direction) {
-      this.viewDate = shiftMonth(this.viewDate, direction)
+      if (this.viewMode === 'month') {
+        this.viewDate = shiftMonth(this.viewDate, direction)
+      } else if (this.viewMode === 'week') {
+        this.viewDate = shiftDate(this.viewDate, direction * 7)
+      } else {
+        this.viewDate = shiftDate(this.viewDate, direction)
+      }
       this.loadOverview()
     },
     moveToToday() {
@@ -924,9 +950,25 @@ export default defineComponent({
 }
 
 .sidebar-action-btn {
-  min-height: 38px;
+  min-height: 72px;
+  text-align: center;
+}
+
+.sidebar-action-btn :deep(.q-btn__content) {
+  width: 100%;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+}
+
+.sidebar-action-btn :deep(.q-btn__content .q-icon) {
+  margin: 0;
+}
+
+.sidebar-action-btn :deep(.block) {
+  text-align: center;
+  line-height: 1.2;
 }
 
 .reservations-shell {
