@@ -541,32 +541,57 @@ body {
   border: 1px solid color-mix(in srgb, var(--app-border) 86%, transparent);
 }
 
-.bulletin-html {
+.bulletin-html,
+.q-editor__content {
   color: var(--app-text);
   line-height: 1.75;
 }
 
-.bulletin-html h1,
-.bulletin-html h2,
-.bulletin-html h3,
-.bulletin-html h4 {
+.bulletin-html :is(h1, h2, h3, h4, h5, h6),
+.q-editor__content :is(h1, h2, h3, h4, h5, h6) {
   font-family: var(--font-display);
-  line-height: 1.1;
-  margin: 1.2em 0 0.45em;
+  font-weight: 600;
+  line-height: 1.18;
+  margin: 0.95em 0 0.3em;
 }
 
-.bulletin-html h1:first-child,
-.bulletin-html h2:first-child,
-.bulletin-html h3:first-child,
-.bulletin-html h4:first-child,
-.bulletin-html p:first-child {
+.bulletin-html h1,
+.q-editor__content h1 {
+  font-size: clamp(1.45rem, 2.4vw, 1.75rem);
+}
+
+.bulletin-html h2,
+.q-editor__content h2 {
+  font-size: clamp(1.28rem, 2vw, 1.5rem);
+}
+
+.bulletin-html h3,
+.q-editor__content h3 {
+  font-size: clamp(1.12rem, 1.6vw, 1.28rem);
+}
+
+.bulletin-html h4,
+.q-editor__content h4 {
+  font-size: 1.05rem;
+}
+
+.bulletin-html h5,
+.q-editor__content h5 {
+  font-size: 0.98rem;
+}
+
+.bulletin-html h6,
+.q-editor__content h6 {
+  font-size: 0.92rem;
+}
+
+.bulletin-html :is(h1, h2, h3, h4, h5, h6, p):first-child,
+.q-editor__content :is(h1, h2, h3, h4, h5, h6, p):first-child {
   margin-top: 0;
 }
 
-.bulletin-html p,
-.bulletin-html ul,
-.bulletin-html ol,
-.bulletin-html blockquote {
+.bulletin-html :is(p, ul, ol, blockquote),
+.q-editor__content :is(p, ul, ol, blockquote) {
   margin: 0 0 1em;
 }
 

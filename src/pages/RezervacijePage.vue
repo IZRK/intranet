@@ -383,10 +383,42 @@
             emit-value
             map-options
             option-value="id"
-            option-label="name"
-            :options="reservations.calendars"
+            option-label="label"
+            options-dense
+            popup-content-class="reservation-calendar-menu"
+            :options="reservationCalendarOptions"
             :label="$t('reservations.reservationCalendar')"
-          />
+          >
+            <template #option="scope">
+              <q-item
+                v-bind="scope.itemProps"
+                :class="
+                  scope.opt.type === 'group'
+                    ? 'reservation-calendar-option reservation-calendar-option-group'
+                    : 'reservation-calendar-option reservation-calendar-option-child'
+                "
+              >
+                <q-item-section v-if="scope.opt.type === 'group'">
+                  <q-item-label class="reservation-calendar-group-label">
+                    {{ scope.opt.label }}
+                  </q-item-label>
+                </q-item-section>
+                <template v-else>
+                  <q-item-section avatar class="reservation-calendar-option-swatch-wrap">
+                    <span class="calendar-swatch" :style="{ background: scope.opt.color }" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="reservation-calendar-option-label">
+                      {{ scope.opt.label }}
+                    </q-item-label>
+                    <q-item-label v-if="scope.opt.group_name" caption class="reservation-calendar-option-caption">
+                      {{ scope.opt.group_name }}
+                    </q-item-label>
+                  </q-item-section>
+                </template>
+              </q-item>
+            </template>
+          </q-select>
           <q-toggle v-model="reservationForm.all_day" :label="$t('reservations.allDay')" />
           <div class="reservation-form-grid">
             <q-input v-model="reservationForm.start_date" outlined readonly :label="$t('reservations.startDate')">
@@ -566,6 +598,31 @@ export default defineComponent({
     },
     groupAssignableCalendars() {
       return this.reservations.calendars
+    },
+    reservationCalendarOptions() {
+      const grouped = this.groupedCalendars.flatMap((entry) => [
+        {
+          id: `group-${entry.group.id}`,
+          label: entry.group.name,
+          type: 'group',
+          disable: true,
+        },
+        ...entry.calendars.map((calendar) => ({
+          ...calendar,
+          label: calendar.name,
+          type: 'calendar',
+          group_name: entry.group.name,
+        })),
+      ])
+
+      const singles = this.ungroupedCalendars.map((calendar) => ({
+        ...calendar,
+        label: calendar.name,
+        type: 'calendar',
+        group_name: null,
+      }))
+
+      return [...grouped, ...singles]
     },
     ungroupedCalendars() {
       return this.reservations.calendars.filter((calendar) => !calendar.group_id)
@@ -1116,6 +1173,50 @@ export default defineComponent({
   min-width: 24px;
   width: 24px;
   height: 24px;
+}
+
+:deep(.reservation-calendar-menu) {
+  padding: 6px;
+}
+
+.reservation-calendar-option {
+  border-radius: 10px;
+  margin: 2px 0;
+}
+
+.reservation-calendar-option-group {
+  margin-top: 6px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--app-bg-elevated) 94%, var(--app-surface)) 0%, color-mix(in srgb, var(--app-bg-elevated) 82%, var(--app-surface)) 100%);
+  border: 1px solid color-mix(in srgb, var(--app-border) 72%, transparent);
+}
+
+.reservation-calendar-option-group :deep(.q-item__section) {
+  min-width: 0;
+}
+
+.reservation-calendar-group-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.reservation-calendar-option-child {
+  padding-left: 10px;
+}
+
+.reservation-calendar-option-swatch-wrap {
+  min-width: 28px;
+}
+
+.reservation-calendar-option-label {
+  font-weight: 600;
+}
+
+.reservation-calendar-option-caption {
+  font-size: 0.72rem;
 }
 
 .calendar-toolbar {
