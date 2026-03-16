@@ -11,8 +11,18 @@
         <div class="user-block">
           <ThemeToggle />
           <LanguageSwitcher class="language-switcher app-language-switcher" />
-          <div class="user-name">{{ auth.user?.name }}</div>
-          <q-btn flat no-caps color="primary" :label="$t('app.logout')" @click="logout" />
+          <q-btn flat round dense icon="more_horiz" class="header-menu-btn" :aria-label="$t('app.menu')" :title="$t('app.menu')">
+            <q-menu anchor="bottom right" self="top right">
+              <q-list dense class="header-menu-list">
+                <q-item v-if="auth.user?.name">
+                  <q-item-section>{{ auth.user?.name }}</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="logout">
+                  <q-item-section>{{ $t('app.logout') }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </div>
       </q-toolbar>
       <q-tabs align="left" inline-label class="app-tabs">

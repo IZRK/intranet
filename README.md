@@ -25,6 +25,16 @@ Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue R
   - notification history with expandable bodies
   - one-click "send again" prefilling from history
   - sending through the PHP messaging endpoints
+- `Rezervacije` workspace for:
+  - full-screen month calendar powered by `@quasar/quasar-ui-qcalendar`
+  - theme-aware light/dark styling aligned with the rest of the intranet UI
+  - grouped calendars in the sidebar, including expandable parent groups
+  - toggling whole groups or individual calendars on and off
+  - creating and editing calendar groups
+  - creating calendars and reassigning them between groups
+  - quick reservation creation with Quasar `q-date` and `q-time` pickers
+  - group-level, calendar-level, and global subscription feed URLs for external calendar clients
+  - reservation event chips that show the reserver name directly on the calendar
 - Branded seal-based app icons, favicon set, header logo, and login logo
 
 ## Install
@@ -60,10 +70,12 @@ npm run build
 - [src/stores/bulletin-store.js](/app/intranet/fe/src/stores/bulletin-store.js)
 - [src/stores/language-store.js](/app/intranet/fe/src/stores/language-store.js)
 - [src/stores/messaging-store.js](/app/intranet/fe/src/stores/messaging-store.js)
+- [src/stores/reservations-store.js](/app/intranet/fe/src/stores/reservations-store.js)
 - [src/stores/theme-store.js](/app/intranet/fe/src/stores/theme-store.js)
 - [src/layouts/MainLayout.vue](/app/intranet/fe/src/layouts/MainLayout.vue)
 - [src/pages/HomePage.vue](/app/intranet/fe/src/pages/HomePage.vue)
 - [src/pages/LoginPage.vue](/app/intranet/fe/src/pages/LoginPage.vue)
 - [src/pages/ObvescanjePage.vue](/app/intranet/fe/src/pages/ObvescanjePage.vue)
+- [src/pages/RezervacijePage.vue](/app/intranet/fe/src/pages/RezervacijePage.vue)
 - [src/css/app.scss](/app/intranet/fe/src/css/app.scss)
 - [public/izrk.webp](/app/intranet/fe/public/izrk.webp)

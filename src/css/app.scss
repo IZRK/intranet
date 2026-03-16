@@ -122,6 +122,8 @@ body {
   min-height: 72px;
   padding: 0 24px;
   border-bottom: 1px solid var(--app-border);
+  flex-wrap: nowrap;
+  gap: 12px;
 }
 
 .brand {
@@ -132,6 +134,8 @@ body {
     'logo subtitle';
   align-items: center;
   column-gap: 12px;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .brand-logo {
@@ -148,7 +152,12 @@ body {
   font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 0.92;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  max-height: 48px;
+  white-space: normal;
 }
 
 .brand-subtitle {
@@ -164,7 +173,10 @@ body {
 .user-block {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .language-switcher {
@@ -177,9 +189,9 @@ body {
 }
 
 .language-toggle {
-  min-width: 44px;
-  width: 44px;
-  height: 44px;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border-radius: 999px;
   color: var(--app-text);
@@ -188,12 +200,25 @@ body {
 }
 
 .theme-toggle {
-  min-width: 44px;
-  width: 44px;
-  height: 44px;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
   color: var(--app-text);
   background: color-mix(in srgb, var(--app-surface) 84%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+}
+
+.header-menu-btn {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--app-text);
+  background: color-mix(in srgb, var(--app-surface) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+}
+
+.header-menu-list {
+  min-width: 160px;
 }
 
 .theme-toggle:hover,
@@ -399,24 +424,39 @@ body {
    HOME PAGE — Editorial Layout
    ===================== */
 
-.bulletin-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .bulletin-card {
   min-height: 320px;
 }
 
 .bulletin-view {
+  position: relative;
   padding: 28px;
 }
 
 .bulletin-meta {
-  margin-bottom: 18px;
+  margin-top: 22px;
   color: var(--app-muted);
   font-size: 0.875rem;
+}
+
+.bulletin-meta-link {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--app-link) 48%, transparent);
+}
+
+.bulletin-edit-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-border) 86%, transparent);
 }
 
 .bulletin-html {
@@ -857,6 +897,15 @@ input:-webkit-autofill:active {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .bulletin-view {
+    padding: 20px 18px;
+  }
+
+  .bulletin-edit-button {
+    top: 10px;
+    right: 10px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -866,8 +915,50 @@ input:-webkit-autofill:active {
     padding-right: 16px;
   }
 
+  .app-toolbar {
+    min-height: 60px;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .brand {
+    grid-template-columns: 36px minmax(0, auto);
+    column-gap: 8px;
+    grid-template-areas: 'logo title';
+    align-items: center;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-title {
+    font-size: 0.86rem;
+    min-height: 36px;
+    max-height: 36px;
+  }
+
+  .user-block {
+    gap: 8px;
+    width: auto;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
   .user-name {
     display: none;
+  }
+
+  .app-tabs {
+    padding: 0 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .app-tabs .q-tab {
+    min-width: auto;
+    padding: 0 10px;
   }
 
   .auth-topbar {
@@ -882,7 +973,7 @@ input:-webkit-autofill:active {
   /* Toolbar context: override the full-width rule, stay compact */
   .app-language-switcher {
     width: auto;
-    min-width: 88px;
+    min-width: 40px;
   }
 
   .feature-row {

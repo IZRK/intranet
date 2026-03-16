@@ -4,22 +4,6 @@
       <div class="content-header-row">
         <div>
           <h1 class="page-title">{{ bulletin.page?.title || $t('home.title') }}</h1>
-          <p class="page-lead">{{ $t('home.lead') }}</p>
-        </div>
-        <div class="bulletin-header-actions">
-          <q-btn
-            flat
-            no-caps
-            color="primary"
-            :label="showHistory ? $t('home.hideHistory') : $t('home.showHistory')"
-            @click="toggleHistory"
-          />
-          <q-btn
-            unelevated
-            color="primary"
-            :label="editing ? $t('home.cancelEdit') : $t('home.edit')"
-            @click="toggleEdit"
-          />
         </div>
       </div>
     </section>
@@ -46,10 +30,28 @@
       </q-card-section>
 
       <q-card-section v-else class="bulletin-view">
-        <div v-if="bulletin.page?.updated_at" class="bulletin-meta">{{ bulletinMeta }}</div>
+        <q-btn
+          flat
+          round
+          dense
+          color="primary"
+          icon="edit"
+          class="bulletin-edit-button"
+          :aria-label="$t('home.edit')"
+          @click="toggleEdit"
+        />
         <div class="bulletin-html" v-html="bulletin.page?.body"></div>
       </q-card-section>
     </q-card>
+
+    <button
+      v-if="!editing && bulletin.page?.updated_at"
+      type="button"
+      class="bulletin-meta bulletin-meta-link bulletin-meta-outside"
+      @click="toggleHistory"
+    >
+      {{ bulletinMeta }}
+    </button>
 
     <q-card v-if="showHistory" flat bordered class="panel-card history-card">
       <q-card-section class="row items-center justify-between">

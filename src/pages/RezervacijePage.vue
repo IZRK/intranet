@@ -1,14 +1,14 @@
 <template>
-  <q-page class="reservations-page">
-    <section class="content-header reservations-header">
+  <q-page class="page-wrap reservations-page">
+    <section class="content-header">
       <div class="content-header-row">
         <div>
           <h1 class="page-title">{{ $t('reservations.title') }}</h1>
           <p class="page-lead">{{ $t('reservations.lead') }}</p>
         </div>
         <div class="reservations-header-actions">
-          <q-btn flat no-caps color="primary" icon="link" :label="$t('reservations.copyFeed')" @click="copyAllFeed" />
-          <q-btn unelevated color="primary" icon="event_available" :label="$t('reservations.addReservation')" @click="openReservationDialog()" />
+          <q-btn flat no-caps color="primary" icon="link" :label="isMobile ? '' : $t('reservations.copyFeed')" @click="copyAllFeed" />
+          <q-btn unelevated color="primary" icon="event_available" :label="isMobile ? '' : $t('reservations.addReservation')" @click="openReservationDialog()" />
         </div>
       </div>
     </section>
@@ -161,12 +161,24 @@
                 {{ visibleCalendarSummary }}
               </div>
             </div>
+            <div class="calendar-toolbar-group calendar-view-switch">
+              <q-btn-toggle
+                v-model="viewMode"
+                unelevated
+                no-caps
+                class="calendar-mode-toggle"
+                toggle-color="primary"
+                :options="viewOptions"
+                @update:model-value="persistViewMode"
+              />
+            </div>
           </q-card-section>
 
           <q-separator />
 
           <q-card-section class="reservations-calendar-wrap">
             <q-calendar-month
+              v-if="viewMode === 'month'"
               ref="calendarRef"
               v-model="viewDate"
               :locale="$i18n.locale"
@@ -211,6 +223,86 @@
                 </div>
               </template>
             </q-calendar-month>
+
+            <div v-else-if="viewMode === 'week' && isMobile" class="mobile-week-stack">
+              <q-calendar-day
+                v-for="date in weekDates"
+                :key="`mobile-week-${date}`"
+                :model-value="date"
+                :locale="$i18n.locale"
+                bordered
+                date-align="right"
+                weekday-align="center"
+                :weekdays="[1, 2, 3, 4, 5, 6, 0]"
+                :max-days="1"
+                :interval-start="7"
+                :interval-minutes="60"
+                :interval-count="14"
+                :interval-height="40"
+                :class="{ 'mobile-week-empty': !eventsForDate(date).length }"
+                @click-time="handleCalendarTimeClick"
+              >
+                <template #day-body="{ scope }">
+                  <div v-if="eventsForDate(scope.timestamp.date).length" class="calendar-day-mode-content">
+                    <button class="calendar-day-add" type="button" @click.stop="openReservationDialog({ date: scope.timestamp.date })">
+                      <q-icon name="add" size="16px" />
+                    </button>
+                    <div class="calendar-day-events">
+                      <button
+                        v-for="event in visibleEventsForDate(scope.timestamp.date)"
+                        :key="`${scope.timestamp.date}-${event.id}`"
+                        type="button"
+                        class="calendar-event-chip"
+                        :style="eventChipStyle(event)"
+                      >
+                        <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
+                        <span class="calendar-event-title">{{ reservationDisplayName(event) }}</span>
+                        <span class="calendar-event-meta">{{ event.calendar_name }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </q-calendar-day>
+            </div>
+
+            <q-calendar-day
+              v-else
+              ref="calendarDayRef"
+              v-model="viewDate"
+              :locale="$i18n.locale"
+              animated
+              bordered
+              date-align="right"
+              weekday-align="center"
+              :weekdays="[1, 2, 3, 4, 5, 6, 0]"
+              :max-days="viewMode === 'week' ? 7 : 1"
+              :interval-start="7"
+              :interval-minutes="60"
+              :interval-count="14"
+              :interval-height="isMobile ? 42 : 50"
+              @click-time="handleCalendarTimeClick"
+            >
+              <template #day-body="{ scope }">
+                <div class="calendar-day-mode-content">
+                  <button class="calendar-day-add" type="button" @click.stop="openReservationDialog({ date: scope.timestamp.date })">
+                    <q-icon name="add" size="16px" />
+                  </button>
+                  <div class="calendar-day-events">
+                    <button
+                      v-for="event in visibleEventsForDate(scope.timestamp.date)"
+                      :key="`${scope.timestamp.date}-${event.id}`"
+                      type="button"
+                      class="calendar-event-chip"
+                      :style="eventChipStyle(event)"
+                    >
+                      <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
+                      <span class="calendar-event-title">{{ reservationDisplayName(event) }}</span>
+                      <span class="calendar-event-meta">{{ event.calendar_name }}</span>
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </q-calendar-day>
           </q-card-section>
         </q-card>
       </section>
@@ -356,7 +448,7 @@
 <script>
 import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
-import { QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
+import { QCalendarDay, QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import { useReservationsStore } from 'stores/reservations-store'
 
 function todayDate() {
@@ -383,6 +475,7 @@ function monthRange(dateString) {
 export default defineComponent({
   name: 'RezervacijePage',
   components: {
+    QCalendarDay,
     QCalendarMonth,
   },
   data() {
@@ -391,6 +484,7 @@ export default defineComponent({
     return {
       reservations: useReservationsStore(),
       viewDate: date,
+      viewMode: 'month',
       visibleCalendarIds: [],
       expandedGroups: {},
       showCalendarDialog: false,
@@ -424,6 +518,16 @@ export default defineComponent({
   computed: {
     allFeedUrl() {
       return this.reservations.feeds?.all?.url || ''
+    },
+    isMobile() {
+      return this.$q.screen.lt.md
+    },
+    viewOptions() {
+      return [
+        { label: this.$t('reservations.viewWeek'), value: 'week' },
+        { label: this.$t('reservations.viewMonth'), value: 'month' },
+        { label: this.$t('reservations.viewDay'), value: 'day' },
+      ]
     },
     groupedCalendars() {
       const map = new Map()
@@ -460,7 +564,17 @@ export default defineComponent({
       return [...grouped, ...singles]
     },
     monthLabel() {
-      return new Intl.DateTimeFormat(this.$i18n.locale === 'sl-SI' ? 'sl-SI' : 'en-US', {
+      if (this.viewMode === 'week') {
+        const first = this.weekDates[0]
+        const last = this.weekDates[this.weekDates.length - 1]
+        return `${this.formatAgendaDate(first)} - ${this.formatAgendaDate(last)}`
+      }
+
+      if (this.viewMode === 'day') {
+        return this.formatAgendaDate(this.viewDate)
+      }
+
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
         month: 'long',
         year: 'numeric',
       }).format(new Date(`${this.viewDate}T00:00:00`))
@@ -471,11 +585,33 @@ export default defineComponent({
     defaultCalendarId() {
       return this.visibleCalendarIds[0] || this.reservations.calendars[0]?.id || null
     },
+    weekDates() {
+      const date = new Date(`${this.viewDate}T00:00:00`)
+      const day = date.getDay()
+      const diff = day === 0 ? -6 : 1 - day
+      date.setDate(date.getDate() + diff)
+      return Array.from({ length: 7 }, (_, index) => {
+        const current = new Date(date)
+        current.setDate(date.getDate() + index)
+        return current.toISOString().slice(0, 10)
+      })
+    },
   },
   async mounted() {
+    this.loadViewMode()
     await this.loadOverview()
   },
   methods: {
+    loadViewMode() {
+      const key = this.isMobile ? 'izrk.reservations.view.mobile' : 'izrk.reservations.view.desktop'
+      const stored = window.localStorage.getItem(key)
+      this.viewMode = stored || (this.isMobile ? 'week' : 'month')
+    },
+    persistViewMode(value) {
+      const key = this.isMobile ? 'izrk.reservations.view.mobile' : 'izrk.reservations.view.desktop'
+      this.viewMode = value
+      window.localStorage.setItem(key, value)
+    },
     async loadOverview() {
       try {
         const range = monthRange(this.viewDate)
@@ -557,6 +693,9 @@ export default defineComponent({
       return this.reservations.reservations.filter((item) => item.calendar_group_id === groupId).length
     },
     handleCalendarDayClick(payload) {
+      this.openReservationDialog({ date: payload?.scope?.timestamp?.date })
+    },
+    handleCalendarTimeClick(payload) {
       this.openReservationDialog({ date: payload?.scope?.timestamp?.date })
     },
     openReservationDialog({ date = null, calendarId = null } = {}) {
@@ -716,6 +855,19 @@ export default defineComponent({
     reservationDisplayName(item) {
       return item.created_by_name || item.title || this.$t('reservations.unnamedCreator')
     },
+    formatWeekday(date) {
+      return new Intl.DateTimeFormat(this.$i18n.locale, { weekday: 'short' }).format(new Date(`${date}T00:00:00`))
+    },
+    formatDayNumber(date) {
+      return new Intl.DateTimeFormat(this.$i18n.locale, { day: 'numeric', month: 'numeric' }).format(new Date(`${date}T00:00:00`))
+    },
+    formatAgendaDate(date) {
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      }).format(new Date(`${date}T00:00:00`))
+    },
     eventChipStyle(item) {
       return {
         '--event-bg': item.calendar_color || '#235FA4',
@@ -782,6 +934,10 @@ export default defineComponent({
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 24px;
   min-height: calc(100vh - 220px);
+}
+
+.calendar-view-switch :deep(.q-btn) {
+  min-height: 36px;
 }
 
 .reservations-sidebar-card,
@@ -928,6 +1084,49 @@ export default defineComponent({
 
 .reservations-calendar-wrap {
   padding: 0;
+}
+
+.calendar-day-mode-content {
+  position: relative;
+  min-height: 100%;
+  padding: 8px 4px 4px;
+}
+
+.mobile-week-stack {
+  display: grid;
+  gap: 14px;
+  padding: 12px;
+}
+
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__day-container),
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__pane),
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__day),
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__day-container > div:last-child) {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__day) {
+  background: color-mix(in srgb, var(--app-surface) 96%, transparent);
+}
+
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__day-interval),
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__interval),
+.mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__head-day-event) {
+  display: none !important;
+}
+
+.calendar-mode-toggle {
+  background: color-mix(in srgb, var(--app-bg-elevated) 76%, var(--app-surface));
+  border: 1px solid var(--app-border);
+}
+
+.calendar-mode-toggle :deep(.q-btn) {
+  color: var(--app-primary);
+}
+
+.calendar-mode-toggle :deep(.q-btn.q-btn--active) {
+  color: #fff;
 }
 
 .calendar-day-content {
@@ -1143,12 +1342,33 @@ export default defineComponent({
     grid-template-columns: 1fr;
   }
 
+  .reservations-calendar-area {
+    order: 1;
+  }
+
+  .reservations-sidebar {
+    order: 2;
+  }
+
   .reservations-sidebar-list {
     max-height: none;
   }
 }
 
 @media (max-width: 700px) {
+  .reservations-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .reservations-header-actions :deep(.q-btn) {
+    min-width: 44px;
+  }
+
+  .sidebar-actions {
+    grid-template-columns: 1fr;
+  }
+
   .reservation-form-grid {
     grid-template-columns: 1fr;
   }
@@ -1158,10 +1378,12 @@ export default defineComponent({
     align-items: stretch;
   }
 
-  .reservations-header-actions {
+  .calendar-view-switch :deep(.q-btn-group) {
     width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  }
+
+  .calendar-view-switch :deep(.q-btn) {
+    flex: 1 1 0;
   }
 }
 </style>
