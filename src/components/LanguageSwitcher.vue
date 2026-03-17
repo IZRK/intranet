@@ -5,10 +5,12 @@
     unelevated
     class="language-toggle"
     :label="nextLocaleLabel"
-    :aria-label="nextLanguageLabel"
-    :title="nextLanguageLabel"
+    :aria-label="switchLanguageLabel"
+    :title="switchLanguageLabel"
     @click="toggleLanguage"
-  />
+  >
+    <q-tooltip>{{ switchLanguageLabel }}</q-tooltip>
+  </q-btn>
 </template>
 
 <script>
@@ -33,6 +35,9 @@ export default defineComponent({
     },
     nextLanguageLabel() {
       return this.nextLocale === 'en-US' ? this.$t('app.languages.en') : this.$t('app.languages.sl')
+    },
+    switchLanguageLabel() {
+      return this.$t('app.changeLanguage', { language: this.nextLanguageLabel })
     },
   },
   methods: {

@@ -13,7 +13,9 @@
           icon="person_add"
           :aria-label="$t('usersAdmin.newUser')"
           @click="openCreateDialog"
-        />
+        >
+          <q-tooltip>{{ $t('usersAdmin.newUser') }}</q-tooltip>
+        </q-btn>
       </div>
     </section>
 
@@ -75,8 +77,12 @@
         <template #body-cell-actions="props">
           <q-td :props="props" class="user-item-actions-cell">
             <div class="user-item-actions">
-              <q-btn flat dense round icon="edit" :aria-label="$t('usersAdmin.editUser')" @click="startEdit(props.row)" />
-              <q-btn flat dense round color="negative" icon="delete" :aria-label="$t('usersAdmin.deleteUser')" @click="removeUser(props.row)" />
+              <q-btn flat dense round icon="edit" :aria-label="$t('usersAdmin.editUser')" @click="startEdit(props.row)">
+                <q-tooltip>{{ $t('usersAdmin.editUser') }}</q-tooltip>
+              </q-btn>
+              <q-btn flat dense round color="negative" icon="delete" :aria-label="$t('usersAdmin.deleteUser')" @click="removeUser(props.row)">
+                <q-tooltip>{{ $t('usersAdmin.deleteUser') }}</q-tooltip>
+              </q-btn>
             </div>
           </q-td>
         </template>
@@ -89,8 +95,12 @@
                   <div class="users-admin-name-secondary">{{ props.row.email }}</div>
                 </div>
                 <div class="user-item-actions">
-                  <q-btn flat dense round icon="edit" :aria-label="$t('usersAdmin.editUser')" @click="startEdit(props.row)" />
-                  <q-btn flat dense round color="negative" icon="delete" :aria-label="$t('usersAdmin.deleteUser')" @click="removeUser(props.row)" />
+                  <q-btn flat dense round icon="edit" :aria-label="$t('usersAdmin.editUser')" @click="startEdit(props.row)">
+                    <q-tooltip>{{ $t('usersAdmin.editUser') }}</q-tooltip>
+                  </q-btn>
+                  <q-btn flat dense round color="negative" icon="delete" :aria-label="$t('usersAdmin.deleteUser')" @click="removeUser(props.row)">
+                    <q-tooltip>{{ $t('usersAdmin.deleteUser') }}</q-tooltip>
+                  </q-btn>
                 </div>
               </q-card-section>
               <q-card-section class="users-admin-mobile-meta">
@@ -123,7 +133,9 @@
             icon="close"
             :aria-label="$t('usersAdmin.closeEditor')"
             @click="closeEditor"
-          />
+          >
+            <q-tooltip>{{ $t('usersAdmin.closeEditor') }}</q-tooltip>
+          </q-btn>
         </q-card-section>
         <q-card-section class="q-gutter-md">
           <q-input v-model="form.first_name" outlined :label="$t('usersAdmin.firstName')" />

@@ -23,13 +23,18 @@
             <div class="panel-subtitle">{{ $t('messaging.manageLists') }}</div>
           </div>
           <q-btn
-            unelevated
+            v-if="auth.isAuthenticated"
+            flat
+            dense
+            round
             color="primary"
-            :label="$t('messaging.refresh')"
-            icon="refresh"
-            :loading="messaging.loading"
-            @click="messaging.load"
-          />
+            icon="add"
+            class="group-add-button"
+            :aria-label="$t('messaging.openGroupEditor')"
+            @click="toggleGroupEditor"
+          >
+            <q-tooltip>{{ $t('messaging.openGroupEditor') }}</q-tooltip>
+          </q-btn>
         </q-card-section>
 
         <q-card-section v-if="!auth.isAuthenticated" class="q-gutter-md">
@@ -61,25 +66,19 @@
                     {{ groupRecipients(group) || $t('messaging.noRecipientsListed') }}
                   </q-item-label>
                 </q-item-section>
-                <q-item-section side top class="group-item-actions">
-                  <q-btn flat dense round icon="edit" :aria-label="$t('messaging.editList')" @click="editGroup(group)" />
-                  <q-btn flat dense round icon="delete" color="negative" :aria-label="$t('messaging.deleteList')" @click="deleteGroup(group)" />
+                <q-item-section side top>
+                  <div class="group-item-actions">
+                    <q-btn flat dense round icon="edit" :aria-label="$t('messaging.editList')" @click="editGroup(group)">
+                      <q-tooltip>{{ $t('messaging.editList') }}</q-tooltip>
+                    </q-btn>
+                    <q-btn flat dense round icon="delete" color="negative" :aria-label="$t('messaging.deleteList')" @click="deleteGroup(group)">
+                      <q-tooltip>{{ $t('messaging.deleteList') }}</q-tooltip>
+                    </q-btn>
+                  </div>
                 </q-item-section>
               </q-item>
             </q-list>
           </q-card-section>
-
-          <q-separator />
-
-          <q-card-section class="panel-actions">
-            <q-btn
-              unelevated
-              color="primary"
-              :label="showGroupEditor ? $t('messaging.closeGroupEditor') : $t('messaging.openGroupEditor')"
-              @click="toggleGroupEditor"
-            />
-          </q-card-section>
-
           <transition name="auth-fade">
             <q-card-section v-if="showGroupEditor" class="q-gutter-md group-editor">
               <div class="panel-title small">{{ $t('messaging.newList') }}</div>
@@ -513,3 +512,17 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.group-add-button {
+  background: color-mix(in srgb, var(--app-surface) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-border) 86%, transparent);
+}
+
+.group-item-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+</style>

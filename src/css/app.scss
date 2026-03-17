@@ -3,6 +3,7 @@
 :root {
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-ui: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  --app-theme-transition: 160ms ease;
 
   --app-bg: #f3f1ea;
   --app-bg-elevated: #ebe7dd;
@@ -116,6 +117,10 @@ body {
   background: var(--app-surface);
   color: var(--app-text);
   border-top: 3px solid var(--app-primary);
+  transition:
+    background-color var(--app-theme-transition),
+    border-color var(--app-theme-transition),
+    color var(--app-theme-transition);
 }
 
 .app-toolbar {
@@ -142,6 +147,7 @@ body {
   object-fit: contain;
   border-radius: 999px;
   background: color-mix(in srgb, var(--app-surface) 90%, white 10%);
+  transition: background-color var(--app-theme-transition);
 }
 
 .brand-text {
@@ -169,6 +175,7 @@ body {
   line-height: 1.15;
   white-space: normal;
   margin: 0;
+  transition: color var(--app-theme-transition);
 }
 
 .toolbar-spacer {
@@ -202,6 +209,10 @@ body {
   color: var(--app-text);
   background: color-mix(in srgb, var(--app-surface) 84%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+  transition:
+    background-color var(--app-theme-transition),
+    border-color var(--app-theme-transition),
+    color var(--app-theme-transition);
 }
 
 .theme-toggle {
@@ -211,6 +222,10 @@ body {
   color: var(--app-text);
   background: color-mix(in srgb, var(--app-surface) 84%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+  transition:
+    background-color var(--app-theme-transition),
+    border-color var(--app-theme-transition),
+    color var(--app-theme-transition);
 }
 
 .header-menu-btn {
@@ -220,6 +235,10 @@ body {
   color: var(--app-text);
   background: color-mix(in srgb, var(--app-surface) 84%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-border) 80%, transparent);
+  transition:
+    background-color var(--app-theme-transition),
+    border-color var(--app-theme-transition),
+    color var(--app-theme-transition);
 }
 
 .header-menu-list {
@@ -249,13 +268,16 @@ body {
     linear-gradient(90deg, transparent 0 39%, #fff 39% 61%, transparent 61% 100%),
     linear-gradient(transparent 0 39%, #fff 39% 61%, transparent 61% 100%),
     linear-gradient(90deg, transparent 0 44%, #c8102e 44% 56%, transparent 56% 100%),
-    linear-gradient(transparent 0 44%, #c8102e 44% 56%, transparent 56% 100%),
-    #012169;
+    linear-gradient(transparent 0 44%, #c8102e 44% 56%, transparent 56% 100%), #012169;
 }
 
 .flag-icon-si {
-  background:
-    linear-gradient(to bottom, #ffffff 0 33.333%, #0b4ea2 33.333% 66.666%, #d1262c 66.666% 100%);
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0 33.333%,
+    #0b4ea2 33.333% 66.666%,
+    #d1262c 66.666% 100%
+  );
 }
 
 .language-toggle .q-btn__content {
@@ -272,6 +294,37 @@ body {
 .app-tabs {
   padding: 0 12px;
   background: var(--app-surface);
+  transition: background-color var(--app-theme-transition);
+}
+
+.app-tabs.q-tabs {
+  transition:
+    color var(--app-theme-transition),
+    background-color var(--app-theme-transition) !important;
+}
+
+.app-tabs .q-tab {
+  transition:
+    color var(--app-theme-transition),
+    background-color var(--app-theme-transition) !important;
+}
+
+.app-tabs .q-tabs__content,
+.app-tabs .q-tabs__arrow,
+.app-tabs .q-tabs__arrow-icon,
+.app-tabs .q-tab__indicator {
+  transition:
+    color var(--app-theme-transition),
+    background-color var(--app-theme-transition),
+    border-color var(--app-theme-transition),
+    opacity var(--app-theme-transition) !important;
+}
+
+.app-tabs .q-tab__content,
+.app-tabs .q-tab__content > *,
+.app-tabs .q-tab__label,
+.app-tabs .q-icon {
+  transition: none !important;
 }
 
 /* =====================
@@ -697,9 +750,21 @@ input:-webkit-autofill:active {
   min-height: 100vh;
   padding: 24px;
   background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--app-primary) 18%, transparent), transparent 34%),
-    radial-gradient(circle at bottom right, color-mix(in srgb, var(--app-border) 46%, transparent), transparent 42%),
-    linear-gradient(160deg, color-mix(in srgb, var(--app-bg) 76%, var(--app-bg-elevated) 24%), var(--app-bg));
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--app-primary) 18%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      color-mix(in srgb, var(--app-border) 46%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--app-bg) 76%, var(--app-bg-elevated) 24%),
+      var(--app-bg)
+    );
 }
 
 .auth-card-wrap {
@@ -816,7 +881,9 @@ input:-webkit-autofill:active {
 
 .auth-fade-enter-active,
 .auth-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 
 .auth-fade-enter-from,

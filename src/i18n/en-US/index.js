@@ -7,6 +7,7 @@ export default {
     profile: 'Profile',
     usersAdmin: 'Users',
     language: 'Language',
+    changeLanguage: 'Change language - {language}',
     themeDark: 'Dark mode',
     themeLight: 'Light mode',
     languages: {
@@ -136,6 +137,7 @@ export default {
     sidebarTitle: 'Calendars',
     allFeeds: 'Subscription feed',
     copyFeed: 'Copy URL',
+    openFeed: 'Open URL',
     feedCopied: 'Calendar URL copied.',
     feedCopyFailed: 'Failed to copy calendar URL.',
     addCalendar: 'New calendar',
@@ -170,6 +172,8 @@ export default {
     allDay: 'All day',
     saveReservation: 'Save reservation',
     today: 'Today',
+    previousPeriod: 'Previous period',
+    nextPeriod: 'Next period',
     viewWeek: 'Week',
     viewMonth: 'Month',
     viewDay: 'Day',
@@ -204,6 +208,7 @@ export default {
   },
   usersAdmin: {
     title: 'Users',
+    actions: 'Actions',
     lead: 'Create, update, and remove intranet accounts.',
     newUser: 'New user',
     editUser: 'Edit user',

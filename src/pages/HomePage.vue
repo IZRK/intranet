@@ -39,7 +39,9 @@
           class="bulletin-edit-button"
           :aria-label="$t('home.edit')"
           @click="toggleEdit"
-        />
+        >
+          <q-tooltip>{{ $t('home.edit') }}</q-tooltip>
+        </q-btn>
         <div class="bulletin-html" v-html="bulletin.page?.body"></div>
       </q-card-section>
     </q-card>

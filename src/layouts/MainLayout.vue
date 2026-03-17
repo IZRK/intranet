@@ -14,6 +14,7 @@
           <ThemeToggle />
           <LanguageSwitcher class="language-switcher app-language-switcher" />
           <q-btn flat round dense icon="more_horiz" class="header-menu-btn" :aria-label="$t('app.menu')" :title="$t('app.menu')">
+            <q-tooltip>{{ $t('app.menu') }}</q-tooltip>
             <q-menu anchor="bottom right" self="top right">
               <q-list dense class="header-menu-list">
                 <q-item v-if="auth.user?.name">

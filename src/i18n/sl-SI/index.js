@@ -7,6 +7,7 @@ export default {
     profile: 'Profil',
     usersAdmin: 'Uporabniki',
     language: 'Jezik',
+    changeLanguage: 'Zamenjaj jezik - {language}',
     themeDark: 'Temni način',
     themeLight: 'Svetli način',
     languages: {
@@ -32,7 +33,8 @@ export default {
     resetTitle: 'Ste pozabili geslo?',
     resetEmail: 'E-pošta za ponastavitev',
     resetButton: 'Pošlji povezavo za ponastavitev',
-    resetRequestText: 'Vnesite e-poštni naslov in poslali vam bomo povezavo za nastavitev novega gesla.',
+    resetRequestText:
+      'Vnesite e-poštni naslov in poslali vam bomo povezavo za nastavitev novega gesla.',
     resetOverline: 'Ponastavitev gesla',
     resetPageTitle: 'Novo geslo',
     resetPageText: 'Izberite novo geslo za svoj račun.',
@@ -102,7 +104,8 @@ export default {
     deleteListSuccess: 'Lista je bila izbrisana.',
     deleteListFailed: 'Brisanje liste ni uspelo.',
     newMessage: 'Novo sporočilo',
-    newMessageText: 'Izberite kanal, listo in vsebino. Za SMS velja omejitev 160 znakov, e-pošta podpira HTML.',
+    newMessageText:
+      'Izberite kanal, listo in vsebino. Za SMS velja omejitev 160 znakov, e-pošta podpira HTML.',
     method: 'Način pošiljanja',
     group: 'Lista',
     recipientsPreview: 'Prejemniki',
@@ -136,6 +139,7 @@ export default {
     sidebarTitle: 'Koledarji',
     allFeeds: 'Naročniški koledar',
     copyFeed: 'Kopiraj URL',
+    openFeed: 'Odpri URL',
     feedCopied: 'URL koledarja je bil kopiran.',
     feedCopyFailed: 'Kopiranje URL ni uspelo.',
     addCalendar: 'Nov koledar',
@@ -170,6 +174,8 @@ export default {
     allDay: 'Celodnevno',
     saveReservation: 'Shrani rezervacijo',
     today: 'Danes',
+    previousPeriod: 'Prejšnje obdobje',
+    nextPeriod: 'Naslednje obdobje',
     viewWeek: 'Teden',
     viewMonth: 'Mesec',
     viewDay: 'Dan',
@@ -204,6 +210,7 @@ export default {
   },
   usersAdmin: {
     title: 'Uporabniki',
+    actions: 'Akcije',
     lead: 'Ustvarjanje, urejanje in brisanje intranet računov.',
     newUser: 'Nov uporabnik',
     editUser: 'Uredi uporabnika',

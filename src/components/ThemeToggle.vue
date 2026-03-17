@@ -8,7 +8,9 @@
     :aria-label="toggleLabel"
     :title="toggleLabel"
     @click="toggleTheme"
-  />
+  >
+    <q-tooltip>{{ toggleLabel }}</q-tooltip>
+  </q-btn>
 </template>
 
 <script>

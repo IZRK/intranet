@@ -7,8 +7,12 @@
           <p class="page-lead">{{ $t('reservations.lead') }}</p>
         </div>
         <div class="reservations-header-actions">
-          <q-btn flat no-caps color="primary" icon="link" :label="isMobile ? '' : $t('reservations.copyFeed')" @click="copyAllFeed" />
-          <q-btn unelevated color="primary" icon="event_available" :label="isMobile ? '' : $t('reservations.addReservation')" @click="openReservationDialog()" />
+          <q-btn flat no-caps color="primary" icon="link" :label="isMobile ? '' : $t('reservations.copyFeed')" @click="copyAllFeed">
+            <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
+          </q-btn>
+          <q-btn unelevated color="primary" icon="event_available" :label="isMobile ? '' : $t('reservations.addReservation')" @click="openReservationDialog()">
+            <q-tooltip>{{ $t('reservations.addReservation') }}</q-tooltip>
+          </q-btn>
         </div>
       </div>
     </section>
@@ -34,7 +38,9 @@
                 <div class="sidebar-hint">{{ $t('reservations.subscribeHint') }}</div>
               </div>
               <div class="sidebar-feed-actions">
-                <q-btn flat dense round icon="content_copy" @click="copyAllFeed" />
+                <q-btn flat dense round icon="content_copy" @click="copyAllFeed">
+                  <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
+                </q-btn>
                 <q-btn
                   v-if="allFeedUrl"
                   flat
@@ -44,7 +50,9 @@
                   type="a"
                   :href="allFeedUrl"
                   target="_blank"
-                />
+                >
+                  <q-tooltip>{{ $t('reservations.openFeed') }}</q-tooltip>
+                </q-btn>
               </div>
             </div>
             <q-input :model-value="allFeedUrl" outlined dense readonly />
@@ -83,8 +91,12 @@
                       </q-item-label>
                     </q-item-section>
                     <q-item-section side top class="calendar-item-actions">
-                      <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editGroup')" @click.stop="openGroupEditor(entry.group)" />
-                      <q-btn flat dense round icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(entry.group.feed_url)" />
+                      <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editGroup')" @click.stop="openGroupEditor(entry.group)">
+                        <q-tooltip>{{ $t('reservations.editGroup') }}</q-tooltip>
+                      </q-btn>
+                      <q-btn flat dense round icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(entry.group.feed_url)">
+                        <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
+                      </q-btn>
                     </q-item-section>
                   </template>
 
@@ -109,9 +121,15 @@
                         </q-item-label>
                       </q-item-section>
                       <q-item-section side top class="calendar-item-actions">
-                        <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editCalendar')" @click.stop="openCalendarEditor(calendar)" />
-                        <q-btn flat dense round size="sm" icon="add" :title="$t('reservations.addForCalendar')" @click.stop="openReservationDialog({ calendarId: calendar.id })" />
-                        <q-btn flat dense round size="sm" icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(calendar.feed_url)" />
+                        <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editCalendar')" @click.stop="openCalendarEditor(calendar)">
+                          <q-tooltip>{{ $t('reservations.editCalendar') }}</q-tooltip>
+                        </q-btn>
+                        <q-btn flat dense round size="sm" icon="add" :title="$t('reservations.addForCalendar')" @click.stop="openReservationDialog({ calendarId: calendar.id })">
+                          <q-tooltip>{{ $t('reservations.addForCalendar') }}</q-tooltip>
+                        </q-btn>
+                        <q-btn flat dense round size="sm" icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(calendar.feed_url)">
+                          <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
+                        </q-btn>
                       </q-item-section>
                     </q-item>
                   </q-list>
@@ -136,9 +154,15 @@
                     </q-item-label>
                   </q-item-section>
                   <q-item-section side top class="calendar-item-actions">
-                    <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editCalendar')" @click.stop="openCalendarEditor(entry.calendar)" />
-                    <q-btn flat dense round size="sm" icon="add" :title="$t('reservations.addForCalendar')" @click.stop="openReservationDialog({ calendarId: entry.calendar.id })" />
-                    <q-btn flat dense round size="sm" icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(entry.calendar.feed_url)" />
+                    <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editCalendar')" @click.stop="openCalendarEditor(entry.calendar)">
+                      <q-tooltip>{{ $t('reservations.editCalendar') }}</q-tooltip>
+                    </q-btn>
+                    <q-btn flat dense round size="sm" icon="add" :title="$t('reservations.addForCalendar')" @click.stop="openReservationDialog({ calendarId: entry.calendar.id })">
+                      <q-tooltip>{{ $t('reservations.addForCalendar') }}</q-tooltip>
+                    </q-btn>
+                    <q-btn flat dense round size="sm" icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(entry.calendar.feed_url)">
+                      <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
+                    </q-btn>
                   </q-item-section>
                 </q-item>
               </template>
@@ -151,9 +175,13 @@
         <q-card flat bordered class="panel-card reservations-calendar-card">
           <q-card-section class="calendar-toolbar">
             <div class="calendar-toolbar-group">
-              <q-btn flat round icon="chevron_left" @click="moveCalendar(-1)" />
+              <q-btn flat round icon="chevron_left" @click="moveCalendar(-1)">
+                <q-tooltip>{{ $t('reservations.previousPeriod') }}</q-tooltip>
+              </q-btn>
               <q-btn flat no-caps color="primary" :label="$t('reservations.today')" @click="moveToToday" />
-              <q-btn flat round icon="chevron_right" @click="moveCalendar(1)" />
+              <q-btn flat round icon="chevron_right" @click="moveCalendar(1)">
+                <q-tooltip>{{ $t('reservations.nextPeriod') }}</q-tooltip>
+              </q-btn>
             </div>
             <div class="calendar-toolbar-center">
               <div class="calendar-title">{{ monthLabel }}</div>
@@ -205,13 +233,16 @@
                       :style="eventChipStyle(event)"
                     >
                       <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
-                      <span class="calendar-event-title">{{ reservationDisplayName(event) }}</span>
-                      <span class="calendar-event-meta">{{ event.calendar_name }}</span>
+                      <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
+                      <span v-if="reservationDetailsLabel(event)" class="calendar-event-meta">
+                        {{ reservationDetailsLabel(event) }}
+                      </span>
+                      <span class="calendar-event-submeta">{{ reservationReserverLabel(event) }}</span>
                       <q-tooltip class="bg-dark text-white">
-                        <div>{{ reservationDisplayName(event) }}</div>
+                        <div>{{ reservationPrimaryLabel(event) }}</div>
                         <div>{{ reservationTimeLabel(event) }}</div>
-                        <div>{{ event.calendar_name }}</div>
-                        <div v-if="event.details">{{ event.details }}</div>
+                        <div v-if="reservationDetailsLabel(event)">{{ reservationDetailsLabel(event) }}</div>
+                        <div>{{ reservationReserverLabel(event) }}</div>
                       </q-tooltip>
                     </button>
                     <div v-if="hiddenEventsCount(scope.timestamp.date) > 0" class="calendar-more-events">
@@ -254,8 +285,11 @@
                         :style="eventChipStyle(event)"
                       >
                         <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
-                        <span class="calendar-event-title">{{ reservationDisplayName(event) }}</span>
-                        <span class="calendar-event-meta">{{ event.calendar_name }}</span>
+                        <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
+                        <span v-if="reservationDetailsLabel(event)" class="calendar-event-meta">
+                          {{ reservationDetailsLabel(event) }}
+                        </span>
+                        <span class="calendar-event-submeta">{{ reservationReserverLabel(event) }}</span>
                       </button>
                     </div>
                   </div>
@@ -294,8 +328,11 @@
                       :style="eventChipStyle(event)"
                     >
                       <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
-                      <span class="calendar-event-title">{{ reservationDisplayName(event) }}</span>
-                      <span class="calendar-event-meta">{{ event.calendar_name }}</span>
+                      <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
+                      <span v-if="reservationDetailsLabel(event)" class="calendar-event-meta">
+                        {{ reservationDetailsLabel(event) }}
+                      </span>
+                      <span class="calendar-event-submeta">{{ reservationReserverLabel(event) }}</span>
                     </button>
                   </div>
                 </div>
@@ -513,6 +550,14 @@ function shiftMonth(dateString, amount) {
   return formatLocalDate(date)
 }
 
+function startOfWeek(dateString) {
+  const date = parseCalendarDate(dateString)
+  const day = date.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  date.setDate(date.getDate() + diff)
+  return formatLocalDate(date)
+}
+
 function monthRange(dateString) {
   const date = parseCalendarDate(dateString)
   const start = new Date(date.getFullYear(), date.getMonth(), 1)
@@ -689,10 +734,12 @@ export default defineComponent({
       const key = this.isMobile ? 'izrk.reservations.view.mobile' : 'izrk.reservations.view.desktop'
       const stored = window.localStorage.getItem(key)
       this.viewMode = stored || (this.isMobile ? 'week' : 'month')
+      this.viewDate = this.normalizeViewDate(this.viewMode, this.viewDate)
     },
     persistViewMode(value) {
       const key = this.isMobile ? 'izrk.reservations.view.mobile' : 'izrk.reservations.view.desktop'
       this.viewMode = value
+      this.viewDate = this.normalizeViewDate(value, this.viewDate)
       window.localStorage.setItem(key, value)
     },
     async loadOverview() {
@@ -740,8 +787,15 @@ export default defineComponent({
       this.loadOverview()
     },
     moveToToday() {
-      this.viewDate = todayDate()
+      this.viewDate = this.normalizeViewDate(this.viewMode, todayDate())
       this.loadOverview()
+    },
+    normalizeViewDate(mode, date) {
+      if (mode === 'week') {
+        return startOfWeek(date)
+      }
+
+      return date
     },
     toggleCalendar(calendarId) {
       if (this.isCalendarVisible(calendarId)) {
@@ -941,8 +995,14 @@ export default defineComponent({
         end: end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       })
     },
-    reservationDisplayName(item) {
-      return item.created_by_name || item.title || this.$t('reservations.unnamedCreator')
+    reservationPrimaryLabel(item) {
+      return item.calendar_name || this.$t('reservations.reservationCalendar')
+    },
+    reservationDetailsLabel(item) {
+      return item.details || item.title || ''
+    },
+    reservationReserverLabel(item) {
+      return item.created_by_name || this.$t('reservations.unnamedCreator')
     },
     formatWeekday(date) {
       return new Intl.DateTimeFormat(this.$i18n.locale, { weekday: 'short' }).format(new Date(`${date}T00:00:00`))
@@ -1034,13 +1094,19 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   gap: 6px;
+  text-align: center;
 }
 
-.sidebar-action-btn :deep(.q-btn__content .q-icon) {
+.sidebar-action-btn :deep(.q-btn__content > .q-icon) {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   margin: 0;
 }
 
-.sidebar-action-btn :deep(.block) {
+.sidebar-action-btn :deep(.q-btn__content > .block) {
+  width: 100%;
+  display: block;
   text-align: center;
   line-height: 1.2;
 }
@@ -1352,6 +1418,13 @@ export default defineComponent({
   margin-top: 2px;
   font-size: 0.72rem;
   opacity: 0.82;
+}
+
+.calendar-event-submeta {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  opacity: 0.72;
 }
 
 .calendar-more-events {
