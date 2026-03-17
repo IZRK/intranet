@@ -13,7 +13,15 @@
         <div class="user-block">
           <ThemeToggle />
           <LanguageSwitcher class="language-switcher app-language-switcher" />
-          <q-btn flat round dense icon="more_horiz" class="header-menu-btn" :aria-label="$t('app.menu')" :title="$t('app.menu')">
+          <q-btn
+            flat
+            round
+            dense
+            icon="more_horiz"
+            class="header-menu-btn"
+            :aria-label="$t('app.menu')"
+            :title="$t('app.menu')"
+          >
             <q-tooltip>{{ $t('app.menu') }}</q-tooltip>
             <q-menu anchor="bottom right" self="top right">
               <q-list dense class="header-menu-list">
@@ -25,6 +33,9 @@
                 </q-item>
                 <q-item v-if="auth.isAdmin" clickable v-close-popup :to="{ name: 'users-admin' }">
                   <q-item-section>{{ $t('app.usersAdmin') }}</q-item-section>
+                </q-item>
+                <q-item v-if="auth.isAdmin" clickable v-close-popup :to="{ name: 'audit-logs' }">
+                  <q-item-section>{{ $t('app.auditLogs') }}</q-item-section>
                 </q-item>
                 <q-separator />
                 <q-item clickable v-close-popup @click="logout">

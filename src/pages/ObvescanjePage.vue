@@ -3,14 +3,16 @@
     <section class="content-header">
       <div class="content-header-row">
         <div>
-        <h1 class="page-title">{{ $t('messaging.title') }}</h1>
-        <p class="page-lead">{{ $t('messaging.lead') }}</p>
+          <h1 class="page-title">{{ $t('messaging.title') }}</h1>
+          <p class="page-lead">{{ $t('messaging.lead') }}</p>
         </div>
         <q-btn
           v-if="auth.isAuthenticated"
           unelevated
           color="primary"
-          :label="showGroupsPanel ? $t('messaging.hideGroupsPanel') : $t('messaging.showGroupsPanel')"
+          :label="
+            showGroupsPanel ? $t('messaging.hideGroupsPanel') : $t('messaging.showGroupsPanel')
+          "
           @click="toggleGroupsPanel"
         />
       </div>
@@ -49,7 +51,12 @@
             <q-banner rounded class="status-banner status-banner-danger">
               {{ $t('messaging.loadError') }}
               <template #action>
-                <q-btn flat color="primary" :label="$t('messaging.refresh')" @click="messaging.load" />
+                <q-btn
+                  flat
+                  color="primary"
+                  :label="$t('messaging.refresh')"
+                  @click="messaging.load"
+                />
               </template>
             </q-banner>
           </q-card-section>
@@ -60,7 +67,8 @@
                 <q-item-section>
                   <q-item-label>{{ group.name }}</q-item-label>
                   <q-item-label caption>
-                    {{ group.description || $t('messaging.noDescription') }} · {{ group.member_count }} {{ $t('messaging.recipients') }}
+                    {{ group.description || $t('messaging.noDescription') }} ·
+                    {{ group.member_count }} {{ $t('messaging.recipients') }}
                   </q-item-label>
                   <q-item-label caption class="group-recipient-line">
                     {{ groupRecipients(group) || $t('messaging.noRecipientsListed') }}
@@ -68,10 +76,25 @@
                 </q-item-section>
                 <q-item-section side top>
                   <div class="group-item-actions">
-                    <q-btn flat dense round icon="edit" :aria-label="$t('messaging.editList')" @click="editGroup(group)">
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      icon="edit"
+                      :aria-label="$t('messaging.editList')"
+                      @click="editGroup(group)"
+                    >
                       <q-tooltip>{{ $t('messaging.editList') }}</q-tooltip>
                     </q-btn>
-                    <q-btn flat dense round icon="delete" color="negative" :aria-label="$t('messaging.deleteList')" @click="deleteGroup(group)">
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      icon="delete"
+                      color="negative"
+                      :aria-label="$t('messaging.deleteList')"
+                      @click="deleteGroup(group)"
+                    >
                       <q-tooltip>{{ $t('messaging.deleteList') }}</q-tooltip>
                     </q-btn>
                   </div>
@@ -83,7 +106,12 @@
             <q-card-section v-if="showGroupEditor" class="q-gutter-md group-editor">
               <div class="panel-title small">{{ $t('messaging.newList') }}</div>
               <q-input v-model="newGroup.name" outlined :label="$t('messaging.listName')" />
-              <q-input v-model="newGroup.description" outlined type="textarea" :label="$t('messaging.description')" />
+              <q-input
+                v-model="newGroup.description"
+                outlined
+                type="textarea"
+                :label="$t('messaging.description')"
+              />
               <q-select
                 v-model="newGroup.userIds"
                 outlined
@@ -114,7 +142,13 @@
                   :label="editingGroupId ? $t('messaging.updateList') : $t('messaging.saveList')"
                   @click="saveGroup"
                 />
-                <q-btn flat no-caps color="primary" :label="$t('messaging.cancel')" @click="closeGroupEditor" />
+                <q-btn
+                  flat
+                  no-caps
+                  color="primary"
+                  :label="$t('messaging.cancel')"
+                  @click="closeGroupEditor"
+                />
               </div>
             </q-card-section>
           </transition>
@@ -185,7 +219,13 @@
           />
           <div aria-live="polite" aria-atomic="true">
             <q-banner v-if="delivery" rounded class="status-banner status-banner-success">
-              {{ $t('messaging.deliveryInfo', { count: delivery.recipient_count, group: delivery.group, method: delivery.method }) }}
+              {{
+                $t('messaging.deliveryInfo', {
+                  count: delivery.recipient_count,
+                  group: delivery.group,
+                  method: delivery.method,
+                })
+              }}
             </q-banner>
           </div>
         </q-card-section>
@@ -224,7 +264,9 @@
         >
           <template #header>
             <q-item-section>
-              <q-item-label class="history-snippet">{{ messageSnippet(item.message) }}</q-item-label>
+              <q-item-label class="history-snippet">{{
+                messageSnippet(item.message)
+              }}</q-item-label>
               <q-item-label caption>
                 {{ historyMeta(item) }}
               </q-item-label>
@@ -245,7 +287,7 @@
           <q-card flat class="history-body">
             <q-card-section>
               <div v-if="item.subject" class="history-subject">{{ item.subject }}</div>
-              <div class="history-message" v-html="item.message"></div>
+              <div class="history-message" v-html="normalizedHistoryHtml(item.message)"></div>
             </q-card-section>
           </q-card>
         </q-expansion-item>
@@ -261,6 +303,10 @@ import { useAuthStore } from 'stores/auth-store'
 import { useMessagingStore } from 'stores/messaging-store'
 import { i18n } from 'boot/i18n'
 
+function normalizeHistoryHtml(html) {
+  return String(html || '').replace(/&(nbsp|#160|#xA0);/gi, ' ')
+}
+
 export default defineComponent({
   name: 'ObvescanjePage',
   data() {
@@ -271,11 +317,7 @@ export default defineComponent({
       showGroupsPanel: false,
       showGroupEditor: false,
       editingGroupId: null,
-      editorToolbar: [
-        ['bold', 'italic', 'underline'],
-        ['unordered', 'ordered'],
-        ['link'],
-      ],
+      editorToolbar: [['bold', 'italic', 'underline'], ['unordered', 'ordered'], ['link']],
       form: {
         method: 'email',
         groupId: null,
@@ -324,10 +366,7 @@ export default defineComponent({
       await this.auth.bootstrap()
     }
     if (this.auth.isAuthenticated) {
-      await Promise.all([
-        this.messaging.load(),
-        this.messaging.loadHistory(),
-      ])
+      await Promise.all([this.messaging.load(), this.messaging.loadHistory()])
     }
   },
   methods: {
@@ -364,7 +403,9 @@ export default defineComponent({
       this.editingGroupId = group.id
       this.newGroup.name = group.name || ''
       this.newGroup.description = group.description || ''
-      this.newGroup.userIds = (group.members || []).filter((member) => member.user_id).map((member) => member.user_id)
+      this.newGroup.userIds = (group.members || [])
+        .filter((member) => member.user_id)
+        .map((member) => member.user_id)
 
       const externalMember = (group.members || []).find((member) => !member.user_id)
       this.newGroup.externalEmail = externalMember?.email || ''
@@ -401,12 +442,16 @@ export default defineComponent({
         this.closeGroupEditor()
         Notify.create({
           type: 'positive',
-          message: i18n.global.t(isEditing ? 'messaging.updateListSuccess' : 'messaging.createListSuccess'),
+          message: i18n.global.t(
+            isEditing ? 'messaging.updateListSuccess' : 'messaging.createListSuccess',
+          ),
         })
       } catch {
         Notify.create({
           type: 'negative',
-          message: i18n.global.t(isEditing ? 'messaging.updateListFailed' : 'messaging.createListFailed'),
+          message: i18n.global.t(
+            isEditing ? 'messaging.updateListFailed' : 'messaging.createListFailed',
+          ),
         })
       }
     },
@@ -435,7 +480,10 @@ export default defineComponent({
         await navigator.clipboard.writeText(this.selectedRecipientsText)
         Notify.create({ type: 'positive', message: i18n.global.t('messaging.recipientsCopied') })
       } catch {
-        Notify.create({ type: 'negative', message: i18n.global.t('messaging.recipientsCopyFailed') })
+        Notify.create({
+          type: 'negative',
+          message: i18n.global.t('messaging.recipientsCopyFailed'),
+        })
       }
     },
     historyMeta(item) {
@@ -456,7 +504,7 @@ export default defineComponent({
       }).format(new Date(value.replace(' ', 'T')))
     },
     messageSnippet(html) {
-      const plain = String(html || '')
+      const plain = normalizeHistoryHtml(html)
         .replace(/<[^>]+>/g, ' ')
         .replace(/\s+/g, ' ')
         .trim()
@@ -466,6 +514,9 @@ export default defineComponent({
       }
 
       return `${plain.slice(0, 120)}...`
+    },
+    normalizedHistoryHtml(html) {
+      return normalizeHistoryHtml(html)
     },
     async loadMoreHistory() {
       await this.messaging.loadHistory({
@@ -485,11 +536,21 @@ export default defineComponent({
         block: 'start',
       })
 
-      Notify.create({ type: 'positive', message: i18n.global.t('messaging.prefillFromHistorySuccess') })
+      Notify.create({
+        type: 'positive',
+        message: i18n.global.t('messaging.prefillFromHistorySuccess'),
+      })
     },
     groupRecipients(group) {
       const recipients = (group.members || [])
-        .map((member) => member.display_name || member.external_name || member.email || member.phone_number || null)
+        .map(
+          (member) =>
+            member.display_name ||
+            member.external_name ||
+            member.email ||
+            member.phone_number ||
+            null,
+        )
         .filter(Boolean)
 
       return recipients.join(', ')

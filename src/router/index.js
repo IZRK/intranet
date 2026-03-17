@@ -9,6 +9,7 @@ import routes from './routes'
 import { useAuthStore } from 'stores/auth-store'
 import { useLanguageStore } from 'stores/language-store'
 import { useThemeStore } from 'stores/theme-store'
+import { api } from 'boot/axios'
 
 /*
  * If not building with SSR mode, you can
@@ -61,6 +62,37 @@ export default defineRouter(function () {
     }
 
     return true
+  })
+
+  Router.afterEach((to, from, failure) => {
+    if (failure) {
+      return
+    }
+
+    const auth = useAuthStore()
+    if (!auth.isAuthenticated) {
+      return
+    }
+
+    const pageKey = typeof to.meta.viewKey === 'string' ? to.meta.viewKey : ''
+    if (!pageKey) {
+      return
+    }
+
+    void api
+      .post('audit/view', {
+        page_key: pageKey,
+        route_name: typeof to.name === 'string' ? to.name : null,
+        route_path: to.fullPath || to.path,
+        resource_label: pageKey,
+        summary: `Viewed ${pageKey}`,
+        context: {
+          from: from?.fullPath || null,
+          params: to.params || {},
+          query: to.query || {},
+        },
+      })
+      .catch(() => {})
   })
 
   return Router
