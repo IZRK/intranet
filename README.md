@@ -1,6 +1,6 @@
 # IZRK Intranet Frontend
 
-Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 4, and a shared dual-theme visual system tuned for the IZRK intranet workflows.
+Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 4, and a shared dual-theme visual system tuned for the IZRK intranet workflows. It ships as both a web app and a Capacitor-based mobile app.
 
 ## Features
 
@@ -12,6 +12,7 @@ Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue R
 - Light and dark theme switching with explicit theme tokens for both modes
 - Theme preference persisted in local storage and in the backend for logged-in users
 - Password reset flow with dedicated screens and reset-mail routing
+- Profile page for self-service account updates
 - Editable `Aktualno` bulletin-board homepage with:
   - rich HTML editing via `q-editor`
   - theme-aware rendering for bulletin content, including readable hyperlinks in both light and dark mode
@@ -27,6 +28,7 @@ Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue R
   - sending through the PHP messaging endpoints
 - `Rezervacije` workspace for:
   - full-screen month calendar powered by `@quasar/quasar-ui-qcalendar`
+  - mobile-friendly day and week views alongside the month view
   - theme-aware light/dark styling aligned with the rest of the intranet UI
   - grouped calendars in the sidebar, including expandable parent groups
   - toggling whole groups or individual calendars on and off
@@ -34,7 +36,11 @@ Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue R
   - creating calendars and reassigning them between groups
   - quick reservation creation with Quasar `q-date` and `q-time` pickers
   - group-level, calendar-level, and global subscription feed URLs for external calendar clients
+  - ICS feed exports for external calendar subscriptions
   - reservation event chips that show the reserver name directly on the calendar
+- Admin-only user management for creating, editing, searching, and deleting users
+- Admin-only audit logs for reviewing system activity
+- Capacitor mobile packaging with over-the-air bundle updates via Capgo
 - Branded seal-based app icons, favicon set, header logo, and login logo
 
 ## Install
@@ -49,33 +55,14 @@ npm install
 npm run dev
 ```
 
-The axios boot file always targets:
+The axios boot file currently targets:
 
 - `https://web.izrk.zrc-sazu.si`
 
 The frontend calls the API through the server base URL, without hardcoding `index.php`.
 
-## Quality checks
+## Mobile build
 
 ```bash
-npm run lint
-npm run build
+npm run android
 ```
-
-## Main files
-
-- [src/boot/axios.js](/app/intranet/fe/src/boot/axios.js)
-- [src/boot/i18n.js](/app/intranet/fe/src/boot/i18n.js)
-- [src/stores/auth-store.js](/app/intranet/fe/src/stores/auth-store.js)
-- [src/stores/bulletin-store.js](/app/intranet/fe/src/stores/bulletin-store.js)
-- [src/stores/language-store.js](/app/intranet/fe/src/stores/language-store.js)
-- [src/stores/messaging-store.js](/app/intranet/fe/src/stores/messaging-store.js)
-- [src/stores/reservations-store.js](/app/intranet/fe/src/stores/reservations-store.js)
-- [src/stores/theme-store.js](/app/intranet/fe/src/stores/theme-store.js)
-- [src/layouts/MainLayout.vue](/app/intranet/fe/src/layouts/MainLayout.vue)
-- [src/pages/HomePage.vue](/app/intranet/fe/src/pages/HomePage.vue)
-- [src/pages/LoginPage.vue](/app/intranet/fe/src/pages/LoginPage.vue)
-- [src/pages/ObvescanjePage.vue](/app/intranet/fe/src/pages/ObvescanjePage.vue)
-- [src/pages/RezervacijePage.vue](/app/intranet/fe/src/pages/RezervacijePage.vue)
-- [src/css/app.scss](/app/intranet/fe/src/css/app.scss)
-- [public/izrk.webp](/app/intranet/fe/public/izrk.webp)
