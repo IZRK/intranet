@@ -458,37 +458,37 @@
           </q-select>
           <q-toggle v-model="reservationForm.all_day" :label="$t('reservations.allDay')" />
           <div class="reservation-form-grid">
-            <q-input v-model="reservationForm.start_date" outlined readonly :label="$t('reservations.startDate')">
+            <q-input v-model="reservationForm.start_date" outlined mask="####-##-##" :label="$t('reservations.startDate')">
               <template #append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-icon name="event" class="cursor-pointer" @click.stop="showReservationPopup('startDatePopup')">
+                  <q-popup-proxy ref="startDatePopup" no-parent-event cover transition-show="scale" transition-hide="scale">
                     <q-date v-model="reservationForm.start_date" mask="YYYY-MM-DD" />
                   </q-popup-proxy>
                 </q-icon>
               </template>
             </q-input>
-            <q-input v-if="!reservationForm.all_day" v-model="reservationForm.start_time" outlined readonly :label="$t('reservations.startTime')">
+            <q-input v-if="!reservationForm.all_day" v-model="reservationForm.start_time" outlined mask="##:##" :label="$t('reservations.startTime')">
               <template #append>
-                <q-icon name="schedule" class="cursor-pointer">
-                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-icon name="schedule" class="cursor-pointer" @click.stop="showReservationPopup('startTimePopup')">
+                  <q-popup-proxy ref="startTimePopup" no-parent-event cover transition-show="scale" transition-hide="scale">
                     <q-time v-model="reservationForm.start_time" mask="HH:mm" format24h />
                   </q-popup-proxy>
                 </q-icon>
               </template>
             </q-input>
-            <q-input v-model="reservationForm.end_date" outlined readonly :label="$t('reservations.endDate')">
+            <q-input v-model="reservationForm.end_date" outlined mask="####-##-##" :label="$t('reservations.endDate')">
               <template #append>
-                <q-icon name="event" class="cursor-pointer">
-                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-icon name="event" class="cursor-pointer" @click.stop="showReservationPopup('endDatePopup')">
+                  <q-popup-proxy ref="endDatePopup" no-parent-event cover transition-show="scale" transition-hide="scale">
                     <q-date v-model="reservationForm.end_date" mask="YYYY-MM-DD" />
                   </q-popup-proxy>
                 </q-icon>
               </template>
             </q-input>
-            <q-input v-if="!reservationForm.all_day" v-model="reservationForm.end_time" outlined readonly :label="$t('reservations.endTime')">
+            <q-input v-if="!reservationForm.all_day" v-model="reservationForm.end_time" outlined mask="##:##" :label="$t('reservations.endTime')">
               <template #append>
-                <q-icon name="schedule" class="cursor-pointer">
-                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-icon name="schedule" class="cursor-pointer" @click.stop="showReservationPopup('endTimePopup')">
+                  <q-popup-proxy ref="endTimePopup" no-parent-event cover transition-show="scale" transition-hide="scale">
                     <q-time v-model="reservationForm.end_time" mask="HH:mm" format24h />
                   </q-popup-proxy>
                 </q-icon>
@@ -789,6 +789,9 @@ export default defineComponent({
     moveToToday() {
       this.viewDate = this.normalizeViewDate(this.viewMode, todayDate())
       this.loadOverview()
+    },
+    showReservationPopup(refName) {
+      this.$refs[refName]?.show?.()
     },
     normalizeViewDate(mode, date) {
       if (mode === 'week') {
