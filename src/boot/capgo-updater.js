@@ -6,6 +6,12 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater'
 const VERSION_URL = 'https://izrk.github.io/intranet/version.txt'
 const BUNDLE_URL = 'https://izrk.github.io/intranet/www.zip'
 
+function withCacheBust(url) {
+  const nextUrl = new URL(url)
+  nextUrl.searchParams.set('_ts', String(Date.now()))
+  return nextUrl.toString()
+}
+
 function parseVersionParts(version) {
   const match = String(version || '').trim().match(/^(\d+)\.(\d+)\.(\d+)/)
   if (!match) {
@@ -41,6 +47,12 @@ export default defineBoot(async () => {
     return
   }
 
+  console.log('[capgo-updater] boot start', {
+    href: window.location.href,
+    native: Capacitor.isNativePlatform(),
+    platform: Capacitor.getPlatform(),
+  })
+
   await CapacitorUpdater.notifyAppReady().catch((error) => {
     console.info('Capgo updater notifyAppReady skipped', error?.message || error)
   })
@@ -48,11 +60,8 @@ export default defineBoot(async () => {
   const localVersion = process.env.BUILD_VERSION
 
   try {
-    const response = await axios.get(VERSION_URL, {
+    const response = await axios.get(withCacheBust(VERSION_URL), {
       responseType: 'text',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
     })
     const serverVersion = String(response.data || '').trim()
 
