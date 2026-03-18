@@ -22,6 +22,7 @@ export default {
       documents: 'Dokumenti',
       comingSoon: 'V pripravi',
     },
+    autoRefreshNotice: 'Stran je bila osvežena z novimi podatki.',
   },
   auth: {
     loginOverline: 'Prijava',

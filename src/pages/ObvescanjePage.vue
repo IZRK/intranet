@@ -50,14 +50,6 @@
           <q-card-section v-if="messaging.error" class="q-pb-none">
             <q-banner rounded class="status-banner status-banner-danger">
               {{ $t('messaging.loadError') }}
-              <template #action>
-                <q-btn
-                  flat
-                  color="primary"
-                  :label="$t('messaging.refresh')"
-                  @click="messaging.load"
-                />
-              </template>
             </q-banner>
           </q-card-section>
 
@@ -180,7 +172,7 @@
                 class="method-tab"
               />
             </q-tabs>
-            <div class="method-panel" :class="`method-panel-${form.method}`">
+            <div class="method-panel">
               <q-select
                 v-model="form.groupId"
                 outlined
@@ -342,6 +334,7 @@ import { Notify } from 'quasar'
 import { useAuthStore } from 'stores/auth-store'
 import { useMessagingStore } from 'stores/messaging-store'
 import { i18n } from 'boot/i18n'
+import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
 function normalizeHistoryHtml(html) {
   return String(html || '').replace(/&(nbsp|#160|#xA0);/gi, ' ')
@@ -413,6 +406,8 @@ export default defineComponent({
         externalEmail: '',
         externalPhone: '',
       },
+      autoRefreshTimer: null,
+      autoRefreshPending: false,
     }
   },
   computed: {
@@ -455,9 +450,72 @@ export default defineComponent({
     if (this.auth.isAuthenticated) {
       await Promise.all([this.messaging.load(), this.messaging.loadHistory()])
       this.rebuildCcDirectory()
+      this.startAutoRefresh()
     }
   },
+  beforeUnmount() {
+    this.stopAutoRefresh()
+  },
   methods: {
+    startAutoRefresh() {
+      this.stopAutoRefresh()
+      this.autoRefreshTimer = window.setInterval(() => {
+        this.runAutoRefresh()
+      }, AUTO_REFRESH_INTERVAL_MS)
+    },
+    stopAutoRefresh() {
+      if (this.autoRefreshTimer) {
+        window.clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+      }
+    },
+    shouldAutoRefresh() {
+      return (
+        this.auth.isAuthenticated &&
+        !this.showGroupEditor &&
+        !this.autoRefreshPending &&
+        !this.messaging.loading &&
+        !this.messaging.historyLoading
+      )
+    },
+    createAutoRefreshSnapshot() {
+      return buildSnapshot({
+        groups: this.messaging.groups,
+        users: this.messaging.users,
+        history: this.messaging.history,
+        historyHasMore: this.messaging.historyHasMore,
+        historyTotal: this.messaging.historyTotal,
+      })
+    },
+    async refreshPageState() {
+      await Promise.all([
+        this.messaging.load(),
+        this.messaging.loadHistory({
+          limit: Math.max(this.messaging.history.length, 10),
+        }),
+      ])
+      this.rebuildCcDirectory()
+    },
+    async runAutoRefresh() {
+      if (!this.shouldAutoRefresh()) {
+        return
+      }
+
+      const previousSnapshot = this.createAutoRefreshSnapshot()
+      this.autoRefreshPending = true
+
+      try {
+        await this.refreshPageState()
+        if (previousSnapshot !== this.createAutoRefreshSnapshot()) {
+          Notify.create({
+            type: 'info',
+            message: this.$t('app.autoRefreshNotice'),
+          })
+        }
+      } finally {
+        this.autoRefreshPending = false
+      }
+    },
     toggleGroupsPanel() {
       this.showGroupsPanel = !this.showGroupsPanel
       if (!this.showGroupsPanel) {
@@ -739,31 +797,26 @@ export default defineComponent({
 .method-tabs-wrap {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .method-tabs {
   justify-content: flex-start;
-  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 55%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 84%, transparent);
   padding: 0;
 }
 
 .method-tab {
-  border-radius: 14px 14px 0 0;
-  background: color-mix(in srgb, var(--app-surface) 80%, white 20%);
-  color: color-mix(in srgb, var(--app-text) 72%, transparent);
+  border-radius: 10px 10px 0 0;
+  background: transparent;
+  color: var(--app-muted);
   border: 1px solid transparent;
   border-bottom: 0;
-  margin-right: 8px;
+  margin-right: 4px;
 }
 
 .method-tab.q-tab--active {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--q-primary) 18%, white 82%) 0%,
-    color-mix(in srgb, var(--app-surface) 92%, white 8%) 100%
-  );
-  border-color: color-mix(in srgb, var(--q-primary) 42%, var(--app-border) 58%);
+  background: var(--app-surface-strong);
+  border-color: color-mix(in srgb, var(--app-border) 84%, transparent);
   color: var(--app-text);
 }
 
@@ -773,51 +826,14 @@ export default defineComponent({
   gap: 16px;
   padding: 18px;
   margin-top: -1px;
-  border-radius: 0 18px 18px 18px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--q-primary) 6%, white 94%) 0%, transparent 100%),
-    color-mix(in srgb, var(--app-surface) 96%, white 4%);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--q-primary) 18%, var(--app-border) 82%);
-}
-
-.method-panel-sms {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--q-primary) 10%, white 90%) 0%, transparent 100%),
-    color-mix(in srgb, var(--app-surface) 94%, white 6%);
-}
-
-.recipients-preview-field :deep(.q-field__control) {
-  min-height: 40px;
-  background: color-mix(in srgb, var(--app-surface) 72%, white 28%);
-  color: color-mix(in srgb, var(--app-text) 68%, transparent);
-}
-
-.recipients-preview-field :deep(.q-field__marginal) {
-  height: 40px;
-}
-
-.recipients-preview-field :deep(.q-field__native),
-.recipients-preview-field :deep(.q-field__input) {
-  min-height: 40px;
-  padding-top: 0;
-  padding-bottom: 0;
-  color: color-mix(in srgb, var(--app-text) 68%, transparent);
-}
-
-.recipients-preview-field :deep(.q-field__label),
-.recipients-preview-field :deep(.q-field__bottom) {
-  color: color-mix(in srgb, var(--app-text) 58%, transparent);
+  border-radius: 0 12px 12px 12px;
+  background: var(--app-surface-strong);
+  border: 1px solid color-mix(in srgb, var(--app-border) 84%, transparent);
+  border-top-color: transparent;
 }
 
 .recipients-preview-field :deep(.q-field__control::before) {
-  border-color: color-mix(in srgb, var(--app-border) 55%, transparent);
   border-style: dashed;
-}
-
-.recipients-preview-field :deep(.q-field__control:hover::before),
-.recipients-preview-field :deep(.q-field--focused .q-field__control::before),
-.recipients-preview-field :deep(.q-field--highlighted .q-field__control::before) {
-  border-color: color-mix(in srgb, var(--app-border) 60%, transparent);
 }
 
 .group-add-button {

@@ -38,6 +38,16 @@ jobs:
       - name: Build Quasar SPA
         run: npx quasar build -m spa
 
+      - name: Build Capacitor web bundle
+        run: npx quasar build -m capacitor -T android --skip-pkg
+
+      - name: Create update artifacts
+        run: |
+          jq -r .version package.json > dist/spa/version.txt
+          cd src-capacitor/www
+          zip -r www.zip .
+          mv www.zip ../../dist/spa/www.zip
+
       - name: Add SPA fallback for GitHub Pages
         run: cp dist/spa/index.html dist/spa/404.html
 

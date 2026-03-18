@@ -564,6 +564,7 @@ import { QCalendarDay, QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import { api } from 'boot/axios'
 import { useAuthStore } from 'stores/auth-store'
 import { useReservationsStore } from 'stores/reservations-store'
+import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
 function todayDate() {
   return formatLocalDate(new Date())
@@ -691,6 +692,8 @@ export default defineComponent({
         end_time: '09:00',
         details: '',
       },
+      autoRefreshTimer: null,
+      autoRefreshPending: false,
     }
   },
   computed: {
@@ -813,8 +816,66 @@ export default defineComponent({
   async mounted() {
     this.loadViewMode()
     await Promise.all([this.loadOverview(), this.loadReservationUsers()])
+    this.startAutoRefresh()
+  },
+  beforeUnmount() {
+    this.stopAutoRefresh()
   },
   methods: {
+    startAutoRefresh() {
+      this.stopAutoRefresh()
+      this.autoRefreshTimer = window.setInterval(() => {
+        this.runAutoRefresh()
+      }, AUTO_REFRESH_INTERVAL_MS)
+    },
+    stopAutoRefresh() {
+      if (this.autoRefreshTimer) {
+        window.clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+      }
+    },
+    shouldAutoRefresh() {
+      return (
+        !this.showCalendarDialog &&
+        !this.showGroupDialog &&
+        !this.showReservationDialog &&
+        !this.showDeleteReservationDialog &&
+        !this.autoRefreshPending &&
+        !this.reservations.loading &&
+        !this.reservations.savingCalendar &&
+        !this.reservations.savingGroup &&
+        !this.reservations.savingReservation
+      )
+    },
+    createAutoRefreshSnapshot() {
+      return buildSnapshot({
+        groups: this.reservations.groups,
+        calendars: this.reservations.calendars,
+        reservations: this.reservations.reservations,
+        feeds: this.reservations.feeds,
+        range: this.reservations.range,
+      })
+    },
+    async runAutoRefresh() {
+      if (!this.shouldAutoRefresh()) {
+        return
+      }
+
+      const previousSnapshot = this.createAutoRefreshSnapshot()
+      this.autoRefreshPending = true
+
+      try {
+        await this.loadOverview({ silent: true })
+        if (previousSnapshot !== this.createAutoRefreshSnapshot()) {
+          Notify.create({
+            type: 'info',
+            message: this.$t('app.autoRefreshNotice'),
+          })
+        }
+      } finally {
+        this.autoRefreshPending = false
+      }
+    },
     loadViewMode() {
       const key = this.isMobile ? 'izrk.reservations.view.mobile' : 'izrk.reservations.view.desktop'
       const stored = window.localStorage.getItem(key)
@@ -827,14 +888,16 @@ export default defineComponent({
       this.viewDate = this.normalizeViewDate(value, this.viewDate)
       window.localStorage.setItem(key, value)
     },
-    async loadOverview() {
+    async loadOverview({ silent = false } = {}) {
       try {
         const range = monthRange(this.viewDate)
         await this.reservations.loadOverview(range)
         this.syncVisibleCalendars()
         this.syncExpandedGroups()
       } catch {
-        Notify.create({ type: 'negative', message: this.$t('reservations.loadFailed') })
+        if (!silent) {
+          Notify.create({ type: 'negative', message: this.$t('reservations.loadFailed') })
+        }
       }
     },
     async loadReservationUsers() {

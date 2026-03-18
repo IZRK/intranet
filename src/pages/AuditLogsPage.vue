@@ -34,14 +34,6 @@
               <q-icon name="search" />
             </template>
           </q-input>
-          <q-btn
-            flat
-            no-caps
-            color="primary"
-            icon="refresh"
-            :label="$t('auditLogs.refresh')"
-            @click="refreshCurrentTab"
-          />
         </div>
       </q-card-section>
 
@@ -220,7 +212,9 @@
 
 <script>
 import { defineComponent } from 'vue'
+import { Notify } from 'quasar'
 import { api } from 'boot/axios'
+import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
 function defaultPagination() {
   return {
@@ -249,6 +243,8 @@ export default defineComponent({
       inspectorOpen: false,
       inspectorKind: 'audit',
       inspectorRow: null,
+      autoRefreshTimer: null,
+      autoRefreshPending: false,
     }
   },
   computed: {
@@ -385,8 +381,73 @@ export default defineComponent({
   },
   async mounted() {
     await this.loadAuditLogs()
+    this.startAutoRefresh()
+  },
+  beforeUnmount() {
+    this.stopAutoRefresh()
   },
   methods: {
+    startAutoRefresh() {
+      this.stopAutoRefresh()
+      this.autoRefreshTimer = window.setInterval(() => {
+        this.runAutoRefresh()
+      }, AUTO_REFRESH_INTERVAL_MS)
+    },
+    stopAutoRefresh() {
+      if (this.autoRefreshTimer) {
+        window.clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+      }
+    },
+    shouldAutoRefresh() {
+      return (
+        !this.inspectorOpen &&
+        !this.autoRefreshPending &&
+        !this.auditLoading &&
+        !this.viewLoading
+      )
+    },
+    createAutoRefreshSnapshot() {
+      if (this.activeTab === 'audit') {
+        return buildSnapshot({
+          rows: this.auditRows,
+          pagination: this.auditPagination,
+        })
+      }
+
+      return buildSnapshot({
+        rows: this.viewRows,
+        pagination: this.viewPagination,
+      })
+    },
+    async refreshPageState() {
+      if (this.activeTab === 'audit') {
+        await this.loadAuditLogs()
+        return
+      }
+
+      await this.loadViewLogs()
+    },
+    async runAutoRefresh() {
+      if (!this.shouldAutoRefresh()) {
+        return
+      }
+
+      const previousSnapshot = this.createAutoRefreshSnapshot()
+      this.autoRefreshPending = true
+
+      try {
+        await this.refreshPageState()
+        if (previousSnapshot !== this.createAutoRefreshSnapshot()) {
+          Notify.create({
+            type: 'info',
+            message: this.$t('app.autoRefreshNotice'),
+          })
+        }
+      } finally {
+        this.autoRefreshPending = false
+      }
+    },
     async handleTabChange(tab) {
       if (tab === 'audit') {
         await this.loadAuditLogs()
@@ -403,14 +464,6 @@ export default defineComponent({
       }
 
       this.viewPagination.page = 1
-      await this.loadViewLogs()
-    },
-    async refreshCurrentTab() {
-      if (this.activeTab === 'audit') {
-        await this.loadAuditLogs()
-        return
-      }
-
       await this.loadViewLogs()
     },
     async handleAuditRequest(props) {

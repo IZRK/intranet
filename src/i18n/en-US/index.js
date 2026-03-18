@@ -22,6 +22,7 @@ export default {
       documents: 'Documents',
       comingSoon: 'Coming soon',
     },
+    autoRefreshNotice: 'This page was refreshed with new data.',
   },
   auth: {
     loginOverline: 'Sign in',

@@ -133,6 +133,7 @@ import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
 import { i18n } from 'boot/i18n'
 import { useBulletinStore } from 'stores/bulletin-store'
+import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
 function stripHtml(html) {
   return String(html || '')
@@ -212,6 +213,8 @@ export default defineComponent({
         title: '',
         body: '',
       },
+      autoRefreshTimer: null,
+      autoRefreshPending: false,
       editorFonts: {
         sans: 'Source Sans 3',
         serif: 'Playfair Display',
@@ -260,8 +263,64 @@ export default defineComponent({
   async mounted() {
     await this.bulletin.loadPage()
     this.syncDraft()
+    this.startAutoRefresh()
+  },
+  beforeUnmount() {
+    this.stopAutoRefresh()
   },
   methods: {
+    startAutoRefresh() {
+      this.stopAutoRefresh()
+      this.autoRefreshTimer = window.setInterval(() => {
+        this.runAutoRefresh()
+      }, AUTO_REFRESH_INTERVAL_MS)
+    },
+    stopAutoRefresh() {
+      if (this.autoRefreshTimer) {
+        window.clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+      }
+    },
+    shouldAutoRefresh() {
+      return !this.editing && !this.bulletin.saving && !this.autoRefreshPending
+    },
+    createAutoRefreshSnapshot() {
+      return buildSnapshot({
+        page: this.bulletin.page,
+        history: this.showHistory ? this.bulletin.history : [],
+        historyHasMore: this.showHistory ? this.bulletin.historyHasMore : false,
+        historyTotal: this.showHistory ? this.bulletin.historyTotal : 0,
+      })
+    },
+    async refreshPageState() {
+      await this.bulletin.loadPage()
+
+      if (this.showHistory) {
+        await this.bulletin.loadHistory({
+          limit: Math.max(this.bulletin.history.length, 10),
+        })
+      }
+    },
+    async runAutoRefresh() {
+      if (!this.shouldAutoRefresh()) {
+        return
+      }
+
+      const previousSnapshot = this.createAutoRefreshSnapshot()
+      this.autoRefreshPending = true
+
+      try {
+        await this.refreshPageState()
+        if (previousSnapshot !== this.createAutoRefreshSnapshot()) {
+          Notify.create({
+            type: 'info',
+            message: this.$t('app.autoRefreshNotice'),
+          })
+        }
+      } finally {
+        this.autoRefreshPending = false
+      }
+    },
     syncDraft() {
       this.draft.title = this.bulletin.page?.title || this.$t('home.title')
       this.draft.body = this.bulletin.page?.body || ''

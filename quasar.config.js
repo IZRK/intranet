@@ -12,7 +12,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['i18n', 'axios'],
+    boot: ['i18n', 'axios', 'capgo-updater'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -46,7 +46,9 @@ export default defineConfig((ctx) => {
 
       publicPath: '/intranet/',
       // analyze: true,
-      // env: {},
+      env: {
+        BUILD_VERSION: process.env.npm_package_version,
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
