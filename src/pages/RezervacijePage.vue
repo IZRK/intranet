@@ -231,6 +231,7 @@
                       type="button"
                       class="calendar-event-chip"
                       :style="eventChipStyle(event)"
+                      @click.stop="openReservationEditor(event)"
                     >
                       <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
                       <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
@@ -283,6 +284,7 @@
                         type="button"
                         class="calendar-event-chip"
                         :style="eventChipStyle(event)"
+                        @click.stop="openReservationEditor(event)"
                       >
                         <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
                         <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
@@ -326,6 +328,7 @@
                       type="button"
                       class="calendar-event-chip"
                       :style="eventChipStyle(event)"
+                      @click.stop="openReservationEditor(event)"
                     >
                       <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
                       <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
@@ -406,10 +409,10 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="showReservationDialog">
+    <q-dialog v-model="showReservationDialog" @hide="resetReservationDialog">
       <q-card class="reservation-dialog-card">
         <q-card-section>
-          <div class="panel-title">{{ $t('reservations.addReservation') }}</div>
+          <div class="panel-title">{{ editingReservationId ? $t('reservations.editReservation') : $t('reservations.addReservation') }}</div>
           <div class="panel-subtitle">{{ $t('reservations.selectedDate') }}: {{ reservationForm.start_date }}</div>
         </q-card-section>
         <q-card-section class="q-gutter-md">
@@ -456,6 +459,31 @@
               </q-item>
             </template>
           </q-select>
+          <q-select
+            v-model="reservationForm.author_id"
+            outlined
+            emit-value
+            map-options
+            use-input
+            fill-input
+            hide-selected
+            input-debounce="0"
+            option-value="id"
+            option-label="label"
+            :options="filteredReservationUsers"
+            :label="$t('reservations.author')"
+            @filter="filterReservationUsers"
+            @popup-show="resetReservationUserOptions"
+          >
+            <template #option="scope">
+              <q-item v-bind="scope.itemProps">
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                  <q-item-label v-if="scope.opt.email" caption>{{ scope.opt.email }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
           <q-toggle v-model="reservationForm.all_day" :label="$t('reservations.allDay')" />
           <div class="reservation-form-grid">
             <q-input v-model="reservationForm.start_date" outlined mask="####-##-##" :label="$t('reservations.startDate')">
@@ -497,7 +525,9 @@
           </div>
           <q-input v-model="reservationForm.details" outlined type="textarea" autogrow :label="$t('reservations.reservationDetails')" />
         </q-card-section>
-        <q-card-actions align="right">
+        <q-card-actions>
+          <q-btn v-if="editingReservationId" flat no-caps color="negative" :label="$t('reservations.deleteReservation')" :loading="reservations.savingReservation" @click="confirmDeleteReservation" />
+          <q-space />
           <q-btn flat no-caps color="primary" :label="$t('reservations.cancel')" v-close-popup />
           <q-btn
             unelevated
@@ -509,6 +539,21 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="showDeleteReservationDialog">
+      <q-card class="reservation-dialog-card">
+        <q-card-section>
+          <div class="panel-title">{{ $t('reservations.deleteReservation') }}</div>
+        </q-card-section>
+        <q-card-section>
+          {{ $t('reservations.deleteConfirm', { name: reservationDeleteLabel }) }}
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat no-caps color="primary" :label="$t('reservations.cancel')" v-close-popup />
+          <q-btn unelevated color="negative" :label="$t('reservations.deleteReservation')" :loading="reservations.savingReservation" @click="deleteReservation" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -516,6 +561,8 @@
 import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
 import { QCalendarDay, QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
+import { api } from 'boot/axios'
+import { useAuthStore } from 'stores/auth-store'
 import { useReservationsStore } from 'stores/reservations-store'
 
 function todayDate() {
@@ -569,6 +616,34 @@ function monthRange(dateString) {
   }
 }
 
+function normalizeReservationUser(user) {
+  const id = Number(user.id)
+  const name = String(user.name || '').trim()
+  const email = String(user.email || '').trim()
+  const label = name || email || `#${id}`
+
+  return {
+    ...user,
+    id,
+    email,
+    label,
+    search_text: `${name} ${email}`.trim().toLowerCase(),
+  }
+}
+
+function reservationDatePart(value) {
+  return String(value || '').slice(0, 10)
+}
+
+function reservationTimePart(value) {
+  return String(value || '').slice(11, 16)
+}
+
+function inclusiveAllDayEndDate(value) {
+  const date = reservationDatePart(value)
+  return date ? shiftDate(date, -1) : todayDate()
+}
+
 export default defineComponent({
   name: 'RezervacijePage',
   components: {
@@ -579,7 +654,10 @@ export default defineComponent({
     const date = todayDate()
 
     return {
+      auth: useAuthStore(),
       reservations: useReservationsStore(),
+      reservationUsers: [],
+      filteredReservationUsers: [],
       viewDate: date,
       viewMode: 'month',
       visibleCalendarIds: [],
@@ -587,8 +665,10 @@ export default defineComponent({
       showCalendarDialog: false,
       showGroupDialog: false,
       showReservationDialog: false,
+      showDeleteReservationDialog: false,
       editingCalendarId: null,
       editingGroupId: null,
+      editingReservationId: null,
       calendarForm: {
         name: '',
         group_id: null,
@@ -603,6 +683,7 @@ export default defineComponent({
       },
       reservationForm: {
         calendar_id: null,
+        author_id: null,
         all_day: true,
         start_date: date,
         end_date: date,
@@ -715,6 +796,10 @@ export default defineComponent({
     defaultCalendarId() {
       return this.visibleCalendarIds[0] || this.reservations.calendars[0]?.id || null
     },
+    reservationDeleteLabel() {
+      const reservation = this.currentEditedReservation()
+      return reservation ? this.reservationPrimaryLabel(reservation) : ''
+    },
     weekDates() {
       const date = parseCalendarDate(this.viewDate)
       const day = date.getDay()
@@ -727,7 +812,7 @@ export default defineComponent({
   },
   async mounted() {
     this.loadViewMode()
-    await this.loadOverview()
+    await Promise.all([this.loadOverview(), this.loadReservationUsers()])
   },
   methods: {
     loadViewMode() {
@@ -750,6 +835,53 @@ export default defineComponent({
         this.syncExpandedGroups()
       } catch {
         Notify.create({ type: 'negative', message: this.$t('reservations.loadFailed') })
+      }
+    },
+    async loadReservationUsers() {
+      try {
+        const { data } = await api.get('reservations/users')
+        this.reservationUsers = (data.users || []).map(normalizeReservationUser)
+        this.resetReservationUserOptions()
+      } catch {
+        Notify.create({ type: 'negative', message: this.$t('reservations.usersLoadFailed') })
+      }
+    },
+    filterReservationUsers(value, update) {
+      update(() => {
+        const needle = String(value || '').trim().toLowerCase()
+        this.filteredReservationUsers = !needle
+          ? [...this.reservationUsers]
+          : this.reservationUsers.filter((user) => user.search_text.includes(needle))
+      })
+    },
+    resetReservationUserOptions() {
+      this.filteredReservationUsers = [...this.reservationUsers]
+    },
+    buildReservationForm({ date = null, calendarId = null, reservation = null } = {}) {
+      if (reservation) {
+        const startDate = reservationDatePart(reservation.starts_at) || todayDate()
+        return {
+          calendar_id: reservation.calendar_id || this.defaultCalendarId,
+          author_id: reservation.author_id ?? reservation.created_by ?? this.auth.user?.id ?? null,
+          all_day: Boolean(reservation.all_day),
+          start_date: startDate,
+          end_date: reservation.all_day ? inclusiveAllDayEndDate(reservation.ends_at) : reservationDatePart(reservation.ends_at) || startDate,
+          start_time: reservationTimePart(reservation.starts_at) || '08:00',
+          end_time: reservationTimePart(reservation.ends_at) || '09:00',
+          details: reservation.details || '',
+        }
+      }
+
+      const selectedDate = date || this.viewDate || todayDate()
+      return {
+        calendar_id: calendarId || this.defaultCalendarId,
+        author_id: this.auth.user?.id || null,
+        all_day: true,
+        start_date: selectedDate,
+        end_date: selectedDate,
+        start_time: '08:00',
+        end_time: '09:00',
+        details: '',
       }
     },
     syncVisibleCalendars() {
@@ -845,17 +977,25 @@ export default defineComponent({
       this.openReservationDialog({ date: payload?.scope?.timestamp?.date })
     },
     openReservationDialog({ date = null, calendarId = null } = {}) {
-      const selectedDate = date || this.viewDate || todayDate()
-      this.reservationForm = {
-        calendar_id: calendarId || this.defaultCalendarId,
-        all_day: true,
-        start_date: selectedDate,
-        end_date: selectedDate,
-        start_time: '08:00',
-        end_time: '09:00',
-        details: '',
-      }
+      this.editingReservationId = null
+      this.reservationForm = this.buildReservationForm({ date, calendarId })
+      this.resetReservationUserOptions()
       this.showReservationDialog = true
+    },
+    openReservationEditor(reservation) {
+      this.editingReservationId = reservation.id
+      this.reservationForm = this.buildReservationForm({ reservation })
+      this.resetReservationUserOptions()
+      this.showReservationDialog = true
+    },
+    resetReservationDialog() {
+      this.editingReservationId = null
+      this.showDeleteReservationDialog = false
+      this.reservationForm = this.buildReservationForm()
+      this.resetReservationUserOptions()
+    },
+    currentEditedReservation() {
+      return this.reservations.reservations.find((item) => item.id === this.editingReservationId) || null
     },
     async saveCalendar() {
       try {
@@ -941,28 +1081,58 @@ export default defineComponent({
       }
     },
     async saveReservation() {
+      const payload = {
+        calendar_id: this.reservationForm.calendar_id,
+        author_id: this.reservationForm.author_id,
+        all_day: this.reservationForm.all_day,
+        starts_at: this.reservationForm.all_day
+          ? this.reservationForm.start_date
+          : `${this.reservationForm.start_date} ${this.reservationForm.start_time}`,
+        ends_at: this.reservationForm.all_day
+          ? this.reservationForm.end_date
+          : `${this.reservationForm.end_date} ${this.reservationForm.end_time}`,
+        details: this.reservationForm.details,
+      }
+      const isEditing = Boolean(this.editingReservationId)
+
       try {
-        await this.reservations.createReservation({
-          calendar_id: this.reservationForm.calendar_id,
-          all_day: this.reservationForm.all_day,
-          starts_at: this.reservationForm.all_day
-            ? this.reservationForm.start_date
-            : `${this.reservationForm.start_date} ${this.reservationForm.start_time}`,
-          ends_at: this.reservationForm.all_day
-            ? this.reservationForm.end_date
-            : `${this.reservationForm.end_date} ${this.reservationForm.end_time}`,
-          details: this.reservationForm.details,
-        })
+        if (isEditing) {
+          await this.reservations.updateReservation({ id: this.editingReservationId, ...payload })
+        } else {
+          await this.reservations.createReservation(payload)
+        }
         this.showReservationDialog = false
-        Notify.create({ type: 'positive', message: this.$t('reservations.reservationCreated') })
+        await this.loadOverview()
+        Notify.create({ type: 'positive', message: this.$t(isEditing ? 'reservations.reservationUpdated' : 'reservations.reservationCreated') })
       } catch (error) {
         Notify.create({
           type: 'negative',
           message:
             error?.response?.status === 409
               ? this.$t('reservations.reservationConflict')
-              : this.$t('reservations.reservationCreateFailed'),
+              : this.$t(isEditing ? 'reservations.reservationUpdateFailed' : 'reservations.reservationCreateFailed'),
         })
+      }
+    },
+    confirmDeleteReservation() {
+      if (!this.currentEditedReservation()) {
+        return
+      }
+      this.showDeleteReservationDialog = true
+    },
+    async deleteReservation() {
+      const reservation = this.currentEditedReservation()
+      if (!reservation) {
+        return
+      }
+      try {
+        await this.reservations.deleteReservation({ id: reservation.id })
+        this.showDeleteReservationDialog = false
+        this.showReservationDialog = false
+        await this.loadOverview()
+        Notify.create({ type: 'positive', message: this.$t('reservations.reservationDeleted') })
+      } catch {
+        Notify.create({ type: 'negative', message: this.$t('reservations.reservationDeleteFailed') })
       }
     },
     eventsForDate(date) {
@@ -1002,10 +1172,10 @@ export default defineComponent({
       return item.calendar_name || this.$t('reservations.reservationCalendar')
     },
     reservationDetailsLabel(item) {
-      return item.details || item.title || ''
+      return item.details || ''
     },
     reservationReserverLabel(item) {
-      return item.created_by_name || this.$t('reservations.unnamedCreator')
+      return item.author_name || item.created_by_name || this.$t('reservations.unnamedCreator')
     },
     formatWeekday(date) {
       return new Intl.DateTimeFormat(this.$i18n.locale, { weekday: 'short' }).format(new Date(`${date}T00:00:00`))

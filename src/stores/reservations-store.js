@@ -25,6 +25,9 @@ function normalizeReservation(reservation) {
     ...reservation,
     id: Number(reservation.id),
     calendar_id: Number(reservation.calendar_id),
+    created_by: reservation.created_by == null ? null : Number(reservation.created_by),
+    updated_by: reservation.updated_by == null ? null : Number(reservation.updated_by),
+    author_id: reservation.author_id == null ? null : Number(reservation.author_id),
     calendar_group_id:
       reservation.calendar_group_id == null ? null : Number(reservation.calendar_group_id),
     all_day: Boolean(reservation.all_day),
@@ -140,6 +143,30 @@ export const useReservationsStore = defineStore('reservations', {
           (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
         )
         return reservation
+      } finally {
+        this.savingReservation = false
+      }
+    },
+
+    async updateReservation(payload) {
+      this.savingReservation = true
+      try {
+        const { data } = await api.post('reservations/update_reservation', payload)
+        const reservation = normalizeReservation(data.reservation)
+        this.reservations = this.reservations.map((item) => (item.id === reservation.id ? reservation : item)).sort(
+          (a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
+        )
+        return reservation
+      } finally {
+        this.savingReservation = false
+      }
+    },
+
+    async deleteReservation(payload) {
+      this.savingReservation = true
+      try {
+        await api.post('reservations/delete_reservation', payload)
+        this.reservations = this.reservations.filter((item) => item.id !== Number(payload.id))
       } finally {
         this.savingReservation = false
       }
