@@ -161,81 +161,95 @@
           <div class="panel-subtitle">{{ $t('messaging.newMessageText') }}</div>
         </q-card-section>
         <q-card-section class="q-gutter-md">
-          <q-select
-            v-model="form.method"
-            outlined
-            emit-value
-            map-options
-            :label="$t('messaging.method')"
-            :options="methodOptions"
-          />
-          <q-select
-            v-model="form.groupId"
-            outlined
-            emit-value
-            map-options
-            :label="$t('messaging.group')"
-            option-value="id"
-            option-label="name"
-            :options="messaging.groups"
-          />
-          <q-input
-            :model-value="selectedRecipientsText"
-            outlined
-            readonly
-            :label="$t('messaging.recipientsPreview')"
-            :hint="$t('messaging.recipientsPreviewHint')"
-            class="copy-field"
-            @click="copyRecipients"
-          />
-          <q-select
-            v-model="form.cc"
-            outlined
-            multiple
-            use-input
-            use-chips
-            input-debounce="0"
-            option-value="value"
-            option-label="label"
-            :options="filteredCcOptions"
-            :label="$t('messaging.cc')"
-            :hint="ccHint"
-            @filter="filterCcOptions"
-            @new-value="addCcOption"
-          >
-            <template #option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section>
-                  <q-item-label>{{ scope.opt.label }}</q-item-label>
-                  <q-item-label v-if="scope.opt.email || scope.opt.phone_number" caption>
-                    {{ scope.opt.email || scope.opt.phone_number }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-          <q-input
-            v-if="form.method === 'email'"
-            v-model="form.subject"
-            outlined
-            :label="$t('messaging.subject')"
-          />
-          <q-editor
-            v-if="form.method === 'email'"
-            v-model="form.message"
-            min-height="12rem"
-            :toolbar="editorToolbar"
-          />
-          <q-input
-            v-else
-            v-model="form.message"
-            outlined
-            autogrow
-            type="textarea"
-            :label="$t('messaging.smsMessage')"
-            maxlength="160"
-            counter
-          />
+          <div class="method-tabs-wrap">
+            <q-tabs
+              v-model="form.method"
+              align="left"
+              dense
+              no-caps
+              inline-label
+              class="method-tabs"
+              active-color="primary"
+              indicator-color="primary"
+            >
+              <q-tab
+                v-for="option in methodOptions"
+                :key="option.value"
+                :name="option.value"
+                :label="option.label"
+                class="method-tab"
+              />
+            </q-tabs>
+            <div class="method-panel" :class="`method-panel-${form.method}`">
+              <q-select
+                v-model="form.groupId"
+                outlined
+                emit-value
+                map-options
+                :label="$t('messaging.group')"
+                option-value="id"
+                option-label="name"
+                :options="messaging.groups"
+              />
+              <q-input
+                :model-value="selectedRecipientsText"
+                outlined
+                readonly
+                :label="$t('messaging.recipientsPreview')"
+                :hint="$t('messaging.recipientsPreviewHint')"
+                class="copy-field recipients-preview-field"
+                @click="copyRecipients"
+              />
+              <q-select
+                v-model="form.cc"
+                outlined
+                multiple
+                use-input
+                use-chips
+                input-debounce="0"
+                option-value="value"
+                option-label="label"
+                :options="filteredCcOptions"
+                :label="$t('messaging.cc')"
+                :hint="ccHint"
+                @filter="filterCcOptions"
+                @new-value="addCcOption"
+              >
+                <template #option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section>
+                      <q-item-label>{{ scope.opt.label }}</q-item-label>
+                      <q-item-label v-if="ccOptionMeta(scope.opt)" caption>
+                        {{ ccOptionMeta(scope.opt) }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+              <q-input
+                v-if="form.method === 'email'"
+                v-model="form.subject"
+                outlined
+                :label="$t('messaging.subject')"
+              />
+              <q-editor
+                v-if="form.method === 'email'"
+                v-model="form.message"
+                min-height="12rem"
+                :toolbar="editorToolbar"
+              />
+              <q-input
+                v-else
+                v-model="form.message"
+                outlined
+                autogrow
+                type="textarea"
+                :label="$t('messaging.smsMessage')"
+                maxlength="160"
+                counter
+              />
+            </div>
+          </div>
           <q-btn
             unelevated
             color="primary"
@@ -337,7 +351,8 @@ function normalizeCcUser(user) {
   const id = Number(user.id)
   const name = String(user.name || '').trim()
   const email = String(user.email || '').trim()
-  const phoneNumber = String(user.mobile_number || user.phone_number || '').trim()
+  const mobileNumber = String(user.mobile_number || '').trim()
+  const phoneNumber = String(mobileNumber || user.phone_number || '').trim()
   const label = name || email || `#${id}`
 
   return {
@@ -346,8 +361,9 @@ function normalizeCcUser(user) {
     user_id: id,
     label,
     email,
+    mobile_number: mobileNumber,
     phone_number: phoneNumber,
-    search_text: `${label} ${email} ${phoneNumber}`.trim().toLowerCase(),
+    search_text: `${label} ${email} ${mobileNumber} ${phoneNumber}`.trim().toLowerCase(),
   }
 }
 
@@ -643,6 +659,15 @@ export default defineComponent({
     normalizedHistoryHtml(html) {
       return normalizeHistoryHtml(html)
     },
+    ccOptionMeta(option) {
+      if (option?.type === 'email') {
+        return option?.email || ''
+      }
+
+      return this.form.method === 'sms'
+        ? option?.mobile_number || option?.phone_number || ''
+        : option?.email || ''
+    },
     async loadMoreHistory() {
       await this.messaging.loadHistory({
         offset: this.messaging.history.length,
@@ -689,10 +714,13 @@ export default defineComponent({
           subject: this.form.subject,
           message: this.form.message,
           cc: (this.form.cc || []).map((item) => {
+            const isSms = this.form.method === 'sms'
+            const phoneNumber = item?.mobile_number || item?.phone_number || null
+
             return {
-              user_id: item?.user_id || null,
-              email: item?.email || null,
-              phone_number: item?.phone_number || null,
+              user_id: null,
+              email: isSms ? null : item?.email || null,
+              phone_number: isSms ? phoneNumber : null,
             }
           }),
         })
@@ -708,6 +736,90 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.method-tabs-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.method-tabs {
+  justify-content: flex-start;
+  border-bottom: 1px solid color-mix(in srgb, var(--app-border) 55%, transparent);
+  padding: 0;
+}
+
+.method-tab {
+  border-radius: 14px 14px 0 0;
+  background: color-mix(in srgb, var(--app-surface) 80%, white 20%);
+  color: color-mix(in srgb, var(--app-text) 72%, transparent);
+  border: 1px solid transparent;
+  border-bottom: 0;
+  margin-right: 8px;
+}
+
+.method-tab.q-tab--active {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--q-primary) 18%, white 82%) 0%,
+    color-mix(in srgb, var(--app-surface) 92%, white 8%) 100%
+  );
+  border-color: color-mix(in srgb, var(--q-primary) 42%, var(--app-border) 58%);
+  color: var(--app-text);
+}
+
+.method-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  margin-top: -1px;
+  border-radius: 0 18px 18px 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--q-primary) 6%, white 94%) 0%, transparent 100%),
+    color-mix(in srgb, var(--app-surface) 96%, white 4%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--q-primary) 18%, var(--app-border) 82%);
+}
+
+.method-panel-sms {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--q-primary) 10%, white 90%) 0%, transparent 100%),
+    color-mix(in srgb, var(--app-surface) 94%, white 6%);
+}
+
+.recipients-preview-field :deep(.q-field__control) {
+  min-height: 40px;
+  background: color-mix(in srgb, var(--app-surface) 72%, white 28%);
+  color: color-mix(in srgb, var(--app-text) 68%, transparent);
+}
+
+.recipients-preview-field :deep(.q-field__marginal) {
+  height: 40px;
+}
+
+.recipients-preview-field :deep(.q-field__native),
+.recipients-preview-field :deep(.q-field__input) {
+  min-height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: color-mix(in srgb, var(--app-text) 68%, transparent);
+}
+
+.recipients-preview-field :deep(.q-field__label),
+.recipients-preview-field :deep(.q-field__bottom) {
+  color: color-mix(in srgb, var(--app-text) 58%, transparent);
+}
+
+.recipients-preview-field :deep(.q-field__control::before) {
+  border-color: color-mix(in srgb, var(--app-border) 55%, transparent);
+  border-style: dashed;
+}
+
+.recipients-preview-field :deep(.q-field__control:hover::before),
+.recipients-preview-field :deep(.q-field--focused .q-field__control::before),
+.recipients-preview-field :deep(.q-field--highlighted .q-field__control::before) {
+  border-color: color-mix(in srgb, var(--app-border) 60%, transparent);
+}
+
 .group-add-button {
   background: color-mix(in srgb, var(--app-surface) 88%, transparent);
   border: 1px solid color-mix(in srgb, var(--app-border) 86%, transparent);
