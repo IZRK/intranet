@@ -190,7 +190,7 @@ function defaultForm() {
     email: '',
     phone_number: '',
     mobile_number: '',
-    role: ['izrk'],
+    role: [],
     password: '',
   }
 }
@@ -203,7 +203,7 @@ function formFromUser(user) {
     email: user.email || '',
     phone_number: user.phone_number || '',
     mobile_number: user.mobile_number || '',
-    role: Array.isArray(user.role) && user.role.length ? [...user.role] : ['izrk'],
+    role: Array.isArray(user.role) ? [...user.role] : [],
     password: '',
   }
 }
@@ -363,6 +363,7 @@ export default defineComponent({
 
       try {
         const payload = { ...this.form }
+        payload.role = Array.isArray(payload.role) ? payload.role : []
         const route = isEditing ? 'users/update' : 'users/create'
         const { data } = await api.post(route, payload)
         if (data.token || (data.user && data.user.id === this.auth.user?.id)) {
