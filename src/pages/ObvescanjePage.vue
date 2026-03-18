@@ -188,6 +188,32 @@
             class="copy-field"
             @click="copyRecipients"
           />
+          <q-select
+            v-model="form.cc"
+            outlined
+            multiple
+            use-input
+            use-chips
+            input-debounce="0"
+            option-value="value"
+            option-label="label"
+            :options="filteredCcOptions"
+            :label="$t('messaging.cc')"
+            :hint="ccHint"
+            @filter="filterCcOptions"
+            @new-value="addCcOption"
+          >
+            <template #option="scope">
+              <q-item v-bind="scope.itemProps">
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                  <q-item-label v-if="scope.opt.email || scope.opt.phone_number" caption>
+                    {{ scope.opt.email || scope.opt.phone_number }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
           <q-input
             v-if="form.method === 'email'"
             v-model="form.subject"
@@ -307,6 +333,41 @@ function normalizeHistoryHtml(html) {
   return String(html || '').replace(/&(nbsp|#160|#xA0);/gi, ' ')
 }
 
+function normalizeCcUser(user) {
+  const id = Number(user.id)
+  const name = String(user.name || '').trim()
+  const email = String(user.email || '').trim()
+  const phoneNumber = String(user.mobile_number || user.phone_number || '').trim()
+  const label = name || email || `#${id}`
+
+  return {
+    type: 'user',
+    value: `user:${id}`,
+    user_id: id,
+    label,
+    email,
+    phone_number: phoneNumber,
+    search_text: `${label} ${email} ${phoneNumber}`.trim().toLowerCase(),
+  }
+}
+
+function normalizeCcEmail(email) {
+  const value = String(email || '').trim().toLowerCase()
+
+  return {
+    type: 'email',
+    value: `email:${value}`,
+    label: value,
+    email: value,
+    phone_number: '',
+    search_text: value,
+  }
+}
+
+function isValidEmail(email) {
+  return /^[\w\d_\-+.]+@[\w\d-]+(\.[\w\d-]+)*\.\w\w+$/i.test(String(email || '').trim())
+}
+
 export default defineComponent({
   name: 'ObvescanjePage',
   data() {
@@ -317,12 +378,17 @@ export default defineComponent({
       showGroupsPanel: false,
       showGroupEditor: false,
       editingGroupId: null,
+      ccDirectory: [],
+      ccDirectoryMap: {},
+      ccOptions: [],
+      filteredCcOptions: [],
       editorToolbar: [['bold', 'italic', 'underline'], ['unordered', 'ordered'], ['link']],
       form: {
         method: 'email',
         groupId: null,
         subject: '',
         message: '',
+        cc: [],
       },
       newGroup: {
         name: '',
@@ -360,6 +426,11 @@ export default defineComponent({
 
       return recipients.join(', ')
     },
+    ccHint() {
+      return this.form.method === 'sms'
+        ? this.$t('messaging.ccSmsHint')
+        : this.$t('messaging.ccHint')
+    },
   },
   async mounted() {
     if (this.auth.token) {
@@ -367,6 +438,7 @@ export default defineComponent({
     }
     if (this.auth.isAuthenticated) {
       await Promise.all([this.messaging.load(), this.messaging.loadHistory()])
+      this.rebuildCcDirectory()
     }
   },
   methods: {
@@ -389,6 +461,57 @@ export default defineComponent({
     closeGroupEditor() {
       this.showGroupEditor = false
       this.editingGroupId = null
+    },
+    rebuildCcDirectory() {
+      const directory = (this.messaging.users || []).map(normalizeCcUser)
+      this.ccDirectory = directory
+      this.ccDirectoryMap = directory.reduce((acc, option) => {
+        acc[option.value] = option
+        return acc
+      }, {})
+
+      const selectedCustomOptions = (this.form.cc || [])
+        .map((item) => item?.value || null)
+        .map((value) => this.ccOptions.find((option) => option.value === value))
+        .filter((option) => option?.type === 'email')
+
+      this.ccOptions = [...directory, ...selectedCustomOptions]
+      this.resetCcOptions()
+    },
+    resetCcOptions() {
+      this.filteredCcOptions = [...this.ccOptions]
+    },
+    filterCcOptions(value, update) {
+      update(() => {
+        const needle = String(value || '').trim().toLowerCase()
+        const options = !needle
+          ? this.ccOptions
+          : this.ccOptions.filter((option) => option.search_text.includes(needle))
+
+        this.filteredCcOptions = options
+      })
+    },
+    addCcOption(value, done) {
+      const normalizedValue = String(value || '').trim().toLowerCase()
+      if (!normalizedValue) {
+        done()
+        return
+      }
+
+      if (!isValidEmail(normalizedValue)) {
+        Notify.create({
+          type: 'negative',
+          message: i18n.global.t('messaging.invalidCcEmail'),
+        })
+        done()
+        return
+      }
+
+      const option = normalizeCcEmail(normalizedValue)
+      if (!this.ccOptions.some((existing) => existing.value === option.value)) {
+        this.ccOptions = [...this.ccOptions, option]
+      }
+      done(option, 'add-unique')
     },
     resetNewGroup() {
       this.newGroup.name = ''
@@ -437,6 +560,8 @@ export default defineComponent({
         } else {
           await this.messaging.createGroup(payload)
         }
+
+        this.rebuildCcDirectory()
 
         this.resetNewGroup()
         this.closeGroupEditor()
@@ -530,6 +655,7 @@ export default defineComponent({
       this.form.groupId = item.group_id || null
       this.form.subject = item.subject || ''
       this.form.message = item.message || ''
+      this.form.cc = []
 
       document.getElementById('message-composer')?.scrollIntoView({
         behavior: 'smooth',
@@ -562,6 +688,13 @@ export default defineComponent({
           group_id: this.form.groupId,
           subject: this.form.subject,
           message: this.form.message,
+          cc: (this.form.cc || []).map((item) => {
+            return {
+              user_id: item?.user_id || null,
+              email: item?.email || null,
+              phone_number: item?.phone_number || null,
+            }
+          }),
         })
         this.delivery = delivery
         await this.messaging.loadHistory()
