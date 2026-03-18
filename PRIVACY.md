@@ -6,7 +6,7 @@ This Privacy Policy applies to the IZRK Intranet application, including its web 
 
 ## Controller and contact
 
-IZRK Intranet is operated for internal organizational use by the Institute of Slovenian Ethnology at ZRC SAZU (`IZRK`, `ZRC SAZU`).
+IZRK Intranet is operated for internal organizational use by the Karst research institute ZRC SAZU (`IZRK`, `ZRC SAZU`).
 
 For privacy questions, requests, or complaints, contact:
 
