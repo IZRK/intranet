@@ -185,6 +185,7 @@
               />
               <q-input
                 :model-value="selectedRecipientsText"
+                dense
                 outlined
                 readonly
                 :label="$t('messaging.recipientsPreview')"
@@ -834,6 +835,27 @@ export default defineComponent({
 
 .recipients-preview-field :deep(.q-field__control::before) {
   border-style: dashed;
+}
+
+.recipients-preview-field :deep(.q-field__control) {
+  min-height: 30px;
+  background: color-mix(in srgb, var(--app-bg-elevated) 86%, var(--app-surface));
+  color: var(--app-muted);
+}
+
+.recipients-preview-field :deep(.q-field__native) {
+  min-height: 30px;
+  padding-top: 1px;
+  padding-bottom: 0;
+  color: var(--app-muted);
+}
+
+.recipients-preview-field :deep(.q-field__label) {
+  color: color-mix(in srgb, var(--app-muted) 88%, var(--app-text));
+}
+
+.recipients-preview-field :deep(.q-field__bottom) {
+  color: var(--app-muted);
 }
 
 .group-add-button {
