@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "quasar dev",
     "build": "quasar build",
+    "ios": "quasar build -m capacitor -T ios -skip-pkg",
     "android": "quasar build -m capacitor -T android --skip-pkg"
   },
   "dependencies": {
