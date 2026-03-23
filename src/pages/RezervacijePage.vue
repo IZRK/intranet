@@ -188,6 +188,9 @@
               <div class="calendar-subtitle">{{ calendarSubtitle }}</div>
             </div>
             <div class="calendar-toolbar-group calendar-view-switch">
+              <q-btn flat no-caps color="primary" icon="print" :label="isMobile ? '' : $t('reservations.print')" @click="printMonthCalendar">
+                <q-tooltip>{{ $t('reservations.print') }}</q-tooltip>
+              </q-btn>
               <q-btn-toggle
                 v-model="viewMode"
                 unelevated
@@ -645,6 +648,23 @@ function inclusiveAllDayEndDate(value) {
   return date ? shiftDate(date, -1) : todayDate()
 }
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[character]
+  })
+}
+
+function sanitizeCssColor(value, fallback) {
+  const normalized = String(value || '').trim()
+  return /^#([0-9a-f]{3,8})$/i.test(normalized) ? normalized : fallback
+}
+
 export default defineComponent({
   name: 'RezervacijePage',
   components: {
@@ -985,6 +1005,294 @@ export default defineComponent({
       this.viewDate = this.normalizeViewDate(this.viewMode, todayDate())
       this.loadOverview()
     },
+    printMonthCalendar() {
+      const iframe = document.createElement('iframe')
+      iframe.setAttribute('aria-hidden', 'true')
+      iframe.style.position = 'fixed'
+      iframe.style.right = '0'
+      iframe.style.bottom = '0'
+      iframe.style.width = '0'
+      iframe.style.height = '0'
+      iframe.style.border = '0'
+
+      document.body.appendChild(iframe)
+
+      const printWindow = iframe.contentWindow
+      const printDocument = printWindow?.document
+
+      if (!printWindow || !printDocument) {
+        iframe.remove()
+        Notify.create({ type: 'negative', message: 'Print view could not be created.' })
+        return
+      }
+
+      const cleanup = () => {
+        window.setTimeout(() => {
+          iframe.remove()
+        }, 0)
+      }
+
+      printWindow.addEventListener('afterprint', cleanup, { once: true })
+
+      printDocument.open()
+      printDocument.write(this.buildPrintDocument())
+      printDocument.close()
+
+      window.setTimeout(() => {
+        printWindow.focus()
+        printWindow.print()
+      }, 150)
+    },
+    buildPrintDocument() {
+      const title = this.formatPrintMonthLabel(this.viewDate)
+      const weekdayLabels = this.printWeekdayLabels()
+      const weeks = this.buildPrintMonthWeeks(this.viewDate)
+      const rowHeights = weeks.map((week) => `${week.weight}fr`).join(' ')
+
+      const weekdayMarkup = weekdayLabels.map((label) => `<div class="weekday">${escapeHtml(label)}</div>`).join('')
+      const weekMarkup = weeks.map((week) => {
+        const dayMarkup = week.map((day) => {
+          const eventMarkup = day.events.map((event) => {
+            return `
+              <div class="event" style="background:${event.background};color:${event.color};">
+                <div class="event-time">${escapeHtml(event.time)}</div>
+                <div class="event-title">${escapeHtml(event.title)}</div>
+                ${event.meta ? `<div class="event-meta">${escapeHtml(event.meta)}</div>` : ''}
+              </div>
+            `
+          }).join('')
+
+          return `
+            <div class="day${day.outside ? ' outside' : ''}">
+              <div class="day-number">${escapeHtml(day.label)}</div>
+              <div class="events">
+                ${eventMarkup}
+                ${day.hiddenCount > 0 ? `<div class="more">${escapeHtml(this.$t('reservations.hiddenMore', { count: day.hiddenCount }))}</div>` : ''}
+              </div>
+            </div>
+          `
+        }).join('')
+
+        return `<div class="week">${dayMarkup}</div>`
+      }).join('')
+
+      return `
+        <!doctype html>
+        <html lang="${escapeHtml(this.$i18n.locale)}">
+          <head>
+            <meta charset="utf-8" />
+            <title>${escapeHtml(title)}</title>
+            <style>
+              @page {
+                size: landscape;
+                margin: 16mm;
+              }
+
+              html,
+              body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+                color: #111827;
+                font-family: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+
+              body {
+                padding: 4mm;
+                box-sizing: border-box;
+              }
+
+              .sheet {
+                width: calc(100% - 8mm);
+                margin: 0 auto;
+                padding: 0 4mm 4mm;
+                box-sizing: border-box;
+              }
+
+              .title {
+                margin: 0 0 5mm;
+                text-align: center;
+                font-family: "Playfair Display", Georgia, serif;
+                font-size: 17pt;
+                font-weight: 700;
+              }
+
+              .calendar {
+                display: grid;
+                grid-template-rows: auto ${rowHeights};
+                height: 154mm;
+                border: 1px solid #d9dee7;
+                page-break-inside: avoid;
+                break-inside: avoid;
+              }
+
+              .weekdays,
+              .week {
+                display: grid;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+              }
+
+              .week {
+                min-height: 0;
+              }
+
+              .weekday,
+              .day {
+                min-width: 0;
+                border-right: 1px solid #e5e7eb;
+              }
+
+              .weekday:last-child,
+              .day:last-child {
+                border-right: 0;
+              }
+
+              .weekday {
+                padding: 2mm 1.5mm;
+                border-bottom: 1px solid #d9dee7;
+                text-align: center;
+                font-size: 8pt;
+                font-weight: 700;
+                color: #334155;
+              }
+
+              .week + .week .day {
+                border-top: 1px solid #e5e7eb;
+              }
+
+              .day {
+                padding: 1.5mm;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                gap: 1mm;
+                min-height: 0;
+                box-sizing: border-box;
+              }
+
+              .day.outside .day-number {
+                color: #94a3b8;
+              }
+
+              .day-number {
+                align-self: flex-end;
+                font-size: 7pt;
+                font-weight: 600;
+                color: #475569;
+              }
+
+              .events {
+                display: grid;
+                gap: 1mm;
+                min-height: 0;
+                overflow: hidden;
+                align-content: start;
+              }
+
+              .event {
+                border-radius: 3px;
+                padding: 1mm 1.2mm;
+                overflow: hidden;
+                max-width: 100%;
+                box-sizing: border-box;
+              }
+
+              .event-time,
+              .event-meta,
+              .more {
+                font-size: 5.7pt;
+                line-height: 1.1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+
+              .event-title {
+                font-size: 6.4pt;
+                line-height: 1.1;
+                font-weight: 700;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+
+              .event-time {
+                opacity: 0.82;
+              }
+
+              .event-meta {
+                opacity: 0.9;
+              }
+
+              .more {
+                color: #64748b;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="sheet">
+              <h1 class="title">${escapeHtml(title)}</h1>
+              <div class="calendar">
+                <div class="weekdays">${weekdayMarkup}</div>
+                ${weekMarkup}
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+    },
+    buildPrintMonthWeeks(dateString) {
+      const monthDate = parseCalendarDate(dateString)
+      const monthStart = formatLocalDate(new Date(monthDate.getFullYear(), monthDate.getMonth(), 1))
+      const gridStart = startOfWeek(monthStart)
+
+      return Array.from({ length: 6 }, (_, weekIndex) => {
+        const days = Array.from({ length: 7 }, (_, dayIndex) => {
+          const date = shiftDate(gridStart, weekIndex * 7 + dayIndex)
+          const current = parseCalendarDate(date)
+          const events = this.eventsForDate(date)
+          const visibleEvents = events.map((event) => ({
+            time: this.reservationTimeLabel(event),
+            title: this.reservationPrimaryLabel(event),
+            meta: this.reservationDetailsLabel(event) || this.reservationReserverLabel(event),
+            background: sanitizeCssColor(event.calendar_color, '#235FA4'),
+            color: sanitizeCssColor(event.calendar_text_color, '#ffffff'),
+          }))
+
+          return {
+            date,
+            label: String(current.getDate()),
+            outside: current.getMonth() !== monthDate.getMonth(),
+            events: visibleEvents,
+            hiddenCount: 0,
+          }
+        })
+
+        const maxEvents = Math.max(...days.map((day) => day.events.length), 0)
+        const hasEvents = maxEvents > 0
+        const weight = !hasEvents ? 0.68 : Math.min(1 + maxEvents * 0.34, 3.4)
+
+        return Object.assign(days, {
+          weight,
+        })
+      })
+    },
+    printWeekdayLabels() {
+      const monday = parseCalendarDate('2024-01-01')
+      return Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(monday)
+        date.setDate(monday.getDate() + index)
+        return new Intl.DateTimeFormat(this.$i18n.locale, { weekday: 'long' }).format(date)
+      })
+    },
+    formatPrintMonthLabel(dateString) {
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date(`${dateString}T00:00:00`))
+    },
     showReservationPopup(refName) {
       this.$refs[refName]?.show?.()
     },
@@ -1311,6 +1619,10 @@ export default defineComponent({
 .sidebar-feed-actions,
 .calendar-toolbar-group {
   gap: 12px;
+}
+
+.calendar-print-title {
+  display: none;
 }
 
 .sidebar-actions {
@@ -1665,6 +1977,181 @@ export default defineComponent({
 
 .calendar-more-events {
   color: var(--app-muted);
+}
+
+@page {
+  size: landscape;
+  margin: 14mm;
+}
+
+@media print {
+  :global(body.reservations-print-mode) {
+    background: #fff !important;
+  }
+
+  :global(body.reservations-print-mode .app-header),
+  :global(body.reservations-print-mode .content-header),
+  :global(body.reservations-print-mode .reservations-sidebar),
+  :global(body.reservations-print-mode .calendar-toolbar),
+  :global(body.reservations-print-mode .q-dialog),
+  :global(body.reservations-print-mode .q-dialog__backdrop),
+  :global(body.reservations-print-mode .q-menu),
+  :global(body.reservations-print-mode .q-notification) {
+    display: none !important;
+  }
+
+  :global(body.reservations-print-mode .q-layout),
+  :global(body.reservations-print-mode .q-page-container),
+  :global(body.reservations-print-mode .page-container),
+  :global(body.reservations-print-mode .reservations-page),
+  :global(body.reservations-print-mode .reservations-shell),
+  :global(body.reservations-print-mode .reservations-calendar-area),
+  :global(body.reservations-print-mode .reservations-calendar-card),
+  :global(body.reservations-print-mode .reservations-calendar-wrap) {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-shell) {
+    display: block !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-card) {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    width: calc(100% - 10mm) !important;
+    max-width: calc(100% - 10mm) !important;
+    height: 170mm !important;
+    margin: 0 auto !important;
+    padding: 4mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid-page;
+    page-break-after: avoid;
+  }
+
+  .calendar-print-title {
+    display: block;
+    margin: 0;
+    padding: 0 0 5mm;
+    font-family: var(--font-display);
+    font-size: 16pt;
+    font-weight: 700;
+    text-align: center;
+    color: #000;
+    text-transform: capitalize;
+  }
+
+  :global(body.reservations-print-mode .calendar-day-add) {
+    display: none !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  :global(body.reservations-print-mode .calendar-day-content) {
+    min-height: 0 !important;
+    padding: 3px 2px 1px !important;
+  }
+
+  :global(body.reservations-print-mode .calendar-day-events) {
+    gap: 1px !important;
+    margin-top: 0 !important;
+  }
+
+  :global(body.reservations-print-mode .calendar-event-chip) {
+    padding: 2px 3px !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    font-size: 7pt !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  :global(body.reservations-print-mode .calendar-event-time),
+  :global(body.reservations-print-mode .calendar-more-events),
+  :global(body.reservations-print-mode .calendar-event-meta),
+  :global(body.reservations-print-mode .calendar-event-submeta) {
+    font-size: 6pt !important;
+    line-height: 1.05 !important;
+  }
+
+  :global(body.reservations-print-mode .calendar-event-title) {
+    font-size: 7pt !important;
+    line-height: 1.05 !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__head--wrapper),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__head--weekdays),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__week),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__week--days),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__week),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__week--wrapper),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__day),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__head),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__body) {
+    background: #fff !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month) {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__head) {
+    flex: 0 0 auto !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__body) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__week--wrapper) {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__head--weekday),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__day) {
+    flex: 1 1 0 !important;
+    width: calc(100% / 7) !important;
+    min-width: 0 !important;
+    max-width: calc(100% / 7) !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__day) {
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__head-day),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__day--label),
+  :global(body.reservations-print-mode .reservations-calendar-wrap .q-calendar-month__day-label) {
+    font-size: 7pt !important;
+    color: #000 !important;
+  }
 }
 
 .reservation-dialog-card {

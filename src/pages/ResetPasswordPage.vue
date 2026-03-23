@@ -33,6 +33,8 @@
             :label="$t('auth.newPassword')"
             type="password"
             autocomplete="new-password"
+            :error="Boolean(password) && password.length < 8"
+            :error-message="$t('auth.passwordMinLength')"
           />
           <q-btn
             unelevated
@@ -75,6 +77,11 @@ export default defineComponent({
   },
   methods: {
     async submit() {
+      if (this.password.length < 8) {
+        Notify.create({ type: 'negative', message: i18n.global.t('auth.passwordMinLength') })
+        return
+      }
+
       try {
         await this.auth.resetPassword({ email: this.email, token: this.token, password: this.password })
         Notify.create({ type: 'positive', message: i18n.global.t('auth.resetPasswordSuccess') })

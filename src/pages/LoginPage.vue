@@ -110,7 +110,7 @@ export default defineComponent({
       try {
         await this.auth.login({ email: this.email, pass: this.password })
         Notify.create({ type: 'positive', message: i18n.global.t('auth.loginSuccess') })
-        this.$router.push('/obvescanje')
+        this.$router.push('/')
       } catch {
         Notify.create({ type: 'negative', message: i18n.global.t('auth.loginFailed') })
       }
