@@ -51,6 +51,13 @@ export default {
     resetPasswordSuccess: 'Geslo je bilo posodobljeno.',
     resetPasswordFailed: 'Ponastavitev ni uspela.',
   },
+  stores: {
+    title: 'Prenesite mobilno aplikacijo',
+    appStore: 'App Store',
+    googlePlay: 'Google Play',
+    appStoreAria: 'Odpri stran aplikacije IZRK intranet v trgovini App Store',
+    googlePlayAria: 'Odpri stran aplikacije IZRK intranet v trgovini Google Play',
+  },
   home: {
     title: 'Aktualno',
     edit: 'Uredi',

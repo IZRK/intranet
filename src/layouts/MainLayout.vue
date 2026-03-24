@@ -11,6 +11,7 @@
         </div>
         <div class="toolbar-spacer" />
         <div class="user-block">
+          <AppStoreLinks variant="icons" :show-title="false" class="app-store-shortcuts" />
           <ThemeToggle />
           <LanguageSwitcher class="language-switcher app-language-switcher" />
           <q-btn
@@ -65,12 +66,14 @@
 <script>
 import { defineComponent } from 'vue'
 import { useAuthStore } from 'stores/auth-store'
+import AppStoreLinks from 'components/AppStoreLinks.vue'
 import LanguageSwitcher from 'components/LanguageSwitcher.vue'
 import ThemeToggle from 'components/ThemeToggle.vue'
 
 export default defineComponent({
   name: 'MainLayout',
   components: {
+    AppStoreLinks,
     LanguageSwitcher,
     ThemeToggle,
   },

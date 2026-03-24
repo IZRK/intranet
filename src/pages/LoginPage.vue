@@ -17,6 +17,7 @@
           <p class="auth-text">
             {{ showingResetRequest ? $t('auth.resetRequestText') : $t('auth.loginText') }}
           </p>
+          <AppStoreLinks variant="banners" class="auth-store-links" />
         </q-card-section>
         <q-card-section class="auth-card-section">
           <div class="auth-form-shell">
@@ -79,12 +80,14 @@ import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
 import { i18n } from 'boot/i18n'
 import { useAuthStore } from 'stores/auth-store'
+import AppStoreLinks from 'components/AppStoreLinks.vue'
 import LanguageSwitcher from 'components/LanguageSwitcher.vue'
 import ThemeToggle from 'components/ThemeToggle.vue'
 
 export default defineComponent({
   name: 'LoginPage',
   components: {
+    AppStoreLinks,
     LanguageSwitcher,
     ThemeToggle,
   },

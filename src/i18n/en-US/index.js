@@ -50,6 +50,13 @@ export default {
     resetPasswordSuccess: 'Password was updated.',
     resetPasswordFailed: 'Reset failed.',
   },
+  stores: {
+    title: 'Get the mobile app',
+    appStore: 'App Store',
+    googlePlay: 'Google Play',
+    appStoreAria: 'Open the App Store page for IZRK intranet',
+    googlePlayAria: 'Open the Google Play page for IZRK intranet',
+  },
   home: {
     title: 'Current',
     edit: 'Edit',

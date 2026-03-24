@@ -2,6 +2,15 @@
 
 Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 4, and a shared dual-theme visual system tuned for the IZRK intranet workflows. It ships as both a web app and a Capacitor-based mobile app.
 
+<p>
+  <a href="https://apps.apple.com/us/app/izrk-intranet/id6760788413" target="_blank" rel="noopener noreferrer">
+    <img src="./public/appstore.webp" alt="Download on the App Store" height="52" />
+  </a>
+  <a href="https://play.google.com/store/apps/details?id=intranet.izrk" target="_blank" rel="noopener noreferrer">
+    <img src="./public/play.webp" alt="Get it on Google Play" height="52" />
+  </a>
+</p>
+
 ## Features
 
 - Login-first flow with protected routes
