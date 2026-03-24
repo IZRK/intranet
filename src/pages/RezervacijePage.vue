@@ -249,9 +249,6 @@
                         <div>{{ reservationReserverLabel(event) }}</div>
                       </q-tooltip>
                     </button>
-                    <div v-if="hiddenEventsCount(scope.timestamp.date) > 0" class="calendar-more-events">
-                      {{ $t('reservations.hiddenMore', { count: hiddenEventsCount(scope.timestamp.date) }) }}
-                    </div>
                   </div>
                 </div>
               </template>
@@ -1510,10 +1507,7 @@ export default defineComponent({
       return this.reservations.reservations.filter((item) => this.isCalendarVisible(item.calendar_id) && this.occursOnDate(item, date))
     },
     visibleEventsForDate(date) {
-      return this.eventsForDate(date).slice(0, 4)
-    },
-    hiddenEventsCount(date) {
-      return Math.max(0, this.eventsForDate(date).length - 4)
+      return this.eventsForDate(date)
     },
     occursOnDate(item, date) {
       const dayStart = new Date(`${date}T00:00:00`).getTime()
@@ -1535,8 +1529,8 @@ export default defineComponent({
       const start = new Date(String(item.starts_at).replace(' ', 'T'))
       const end = new Date(String(item.ends_at).replace(' ', 'T'))
       return this.$t('reservations.timeRange', {
-        start: start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        end: end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        start: start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        end: end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
       })
     },
     reservationPrimaryLabel(item) {
@@ -1679,11 +1673,21 @@ export default defineComponent({
 }
 
 .reservations-sidebar {
+  display: flex;
   min-width: 0;
+  min-height: 0;
+}
+
+.reservations-sidebar-card {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .reservations-sidebar-list {
-  max-height: calc(100vh - 420px);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
 }
 
@@ -2208,7 +2212,8 @@ export default defineComponent({
 }
 
 :deep(.q-calendar-month__day--content) {
-  height: calc(100% - 34px);
+  height: auto;
+  min-height: calc(100% - 34px);
 }
 
 :deep(.q-calendar-month) {
@@ -2226,10 +2231,18 @@ export default defineComponent({
 :deep(.q-calendar-month__head--weekdays),
 :deep(.q-calendar-month__week),
 :deep(.q-calendar-month__week--days),
+:deep(.q-calendar-month__week--wrapper),
 :deep(.q-calendar-month__week--events),
 :deep(.q-calendar-month__day),
 :deep(.q-calendar-month__workweek) {
   border-color: var(--app-border) !important;
+}
+
+:deep(.q-calendar-month__week),
+:deep(.q-calendar-month__week--days),
+:deep(.q-calendar-month__week--wrapper),
+:deep(.q-calendar-month__day) {
+  height: auto;
 }
 
 :deep(.q-calendar-month__day) {
