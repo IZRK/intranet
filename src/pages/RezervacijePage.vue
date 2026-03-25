@@ -566,6 +566,8 @@ import { useAuthStore } from 'stores/auth-store'
 import { useReservationsStore } from 'stores/reservations-store'
 import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
+const VISIBLE_CALENDAR_STORAGE_KEY = 'izrk.reservations.visible-calendars'
+
 function todayDate() {
   return formatLocalDate(new Date())
 }
@@ -679,6 +681,7 @@ export default defineComponent({
       viewDate: date,
       viewMode: 'month',
       visibleCalendarIds: [],
+      visibleCalendarSelectionLoaded: false,
       expandedGroups: {},
       showCalendarDialog: false,
       showGroupDialog: false,
@@ -832,6 +835,7 @@ export default defineComponent({
   },
   async mounted() {
     this.loadViewMode()
+    this.visibleCalendarSelectionLoaded = this.loadVisibleCalendarIds()
     await Promise.all([this.loadOverview(), this.loadReservationUsers()])
     this.startAutoRefresh()
   },
@@ -905,6 +909,32 @@ export default defineComponent({
       this.viewDate = this.normalizeViewDate(value, this.viewDate)
       window.localStorage.setItem(key, value)
     },
+    normalizeVisibleCalendarIds(ids) {
+      return [...new Set((Array.isArray(ids) ? ids : []).map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))]
+    },
+    loadVisibleCalendarIds() {
+      const stored = window.localStorage.getItem(VISIBLE_CALENDAR_STORAGE_KEY)
+      if (!stored) {
+        return false
+      }
+
+      try {
+        const parsed = JSON.parse(stored)
+        if (!Array.isArray(parsed)) {
+          return false
+        }
+
+        this.visibleCalendarIds = this.normalizeVisibleCalendarIds(parsed)
+        return true
+      } catch {
+        return false
+      }
+    },
+    setVisibleCalendarIds(ids) {
+      const normalized = this.normalizeVisibleCalendarIds(ids)
+      this.visibleCalendarIds = normalized
+      window.localStorage.setItem(VISIBLE_CALENDAR_STORAGE_KEY, JSON.stringify(normalized))
+    },
     async loadOverview({ silent = false } = {}) {
       try {
         const range = monthRange(this.viewDate)
@@ -966,18 +996,14 @@ export default defineComponent({
     },
     syncVisibleCalendars() {
       const ids = this.reservations.calendars.map((calendar) => calendar.id)
-      if (!this.visibleCalendarIds.length) {
-        this.visibleCalendarIds = [...ids]
+      if (!this.visibleCalendarSelectionLoaded) {
+        this.visibleCalendarSelectionLoaded = true
+        this.setVisibleCalendarIds(ids)
         return
       }
 
       const current = new Set(this.visibleCalendarIds)
-      ids.forEach((id) => {
-        if (!current.has(id)) {
-          current.add(id)
-        }
-      })
-      this.visibleCalendarIds = ids.filter((id) => current.has(id))
+      this.setVisibleCalendarIds(ids.filter((id) => current.has(id)))
     },
     syncExpandedGroups() {
       const nextState = { ...this.expandedGroups }
@@ -1302,11 +1328,11 @@ export default defineComponent({
     },
     toggleCalendar(calendarId) {
       if (this.isCalendarVisible(calendarId)) {
-        this.visibleCalendarIds = this.visibleCalendarIds.filter((id) => id !== calendarId)
+        this.setVisibleCalendarIds(this.visibleCalendarIds.filter((id) => id !== calendarId))
         return
       }
 
-      this.visibleCalendarIds = [...this.visibleCalendarIds, calendarId]
+      this.setVisibleCalendarIds([...this.visibleCalendarIds, calendarId])
     },
     isCalendarVisible(calendarId) {
       return this.visibleCalendarIds.includes(calendarId)
@@ -1320,13 +1346,13 @@ export default defineComponent({
       const ids = calendars.map((calendar) => calendar.id)
       const allVisible = ids.every((id) => this.isCalendarVisible(id))
       if (allVisible) {
-        this.visibleCalendarIds = this.visibleCalendarIds.filter((id) => !ids.includes(id))
+        this.setVisibleCalendarIds(this.visibleCalendarIds.filter((id) => !ids.includes(id)))
         return
       }
 
       const next = new Set(this.visibleCalendarIds)
       ids.forEach((id) => next.add(id))
-      this.visibleCalendarIds = this.reservations.calendars.map((calendar) => calendar.id).filter((id) => next.has(id))
+      this.setVisibleCalendarIds(this.reservations.calendars.map((calendar) => calendar.id).filter((id) => next.has(id)))
     },
     isGroupVisible(groupId) {
       const ids = this.reservations.calendars.filter((calendar) => calendar.group_id === groupId).map((calendar) => calendar.id)
@@ -1370,7 +1396,7 @@ export default defineComponent({
         const calendar = this.editingCalendarId
           ? await this.reservations.updateCalendar({ id: this.editingCalendarId, ...this.calendarForm })
           : await this.reservations.createCalendar(this.calendarForm)
-        this.visibleCalendarIds = [...this.visibleCalendarIds, calendar.id]
+        this.setVisibleCalendarIds([...this.visibleCalendarIds, calendar.id])
         this.calendarForm = {
           name: '',
           group_id: null,
