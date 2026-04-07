@@ -941,9 +941,12 @@ export default defineComponent({
         await this.reservations.loadOverview(range)
         this.syncVisibleCalendars()
         this.syncExpandedGroups()
-      } catch {
+      } catch (error) {
         if (!silent) {
-          Notify.create({ type: 'negative', message: this.$t('reservations.loadFailed') })
+          Notify.create({
+            type: 'negative',
+            message: this.reservationErrorMessage(error, 'reservations.loadFailed'),
+          })
         }
       }
     },
@@ -952,9 +955,27 @@ export default defineComponent({
         const { data } = await api.get('reservations/users')
         this.reservationUsers = (data.users || []).map(normalizeReservationUser)
         this.resetReservationUserOptions()
-      } catch {
-        Notify.create({ type: 'negative', message: this.$t('reservations.usersLoadFailed') })
+      } catch (error) {
+        Notify.create({
+          type: 'negative',
+          message: this.reservationErrorMessage(error, 'reservations.usersLoadFailed'),
+        })
       }
+    },
+    reservationErrorMessage(error, fallbackKey) {
+      const apiError = error?.response?.data?.error || null
+      const translationKey = apiError?.code ? `reservations.errors.${apiError.code}` : null
+
+      if (translationKey && this.$te(translationKey)) {
+        return this.$t(translationKey)
+      }
+
+      const message = typeof apiError?.message === 'string' ? apiError.message.trim() : ''
+      if (message) {
+        return message
+      }
+
+      return this.$t(fallbackKey)
     },
     filterReservationUsers(value, update) {
       update(() => {
@@ -1408,8 +1429,11 @@ export default defineComponent({
         this.showCalendarDialog = false
         Notify.create({ type: 'positive', message: this.$t('reservations.calendarCreated') })
         await this.loadOverview()
-      } catch {
-        Notify.create({ type: 'negative', message: this.$t('reservations.calendarCreateFailed') })
+      } catch (error) {
+        Notify.create({
+          type: 'negative',
+          message: this.reservationErrorMessage(error, 'reservations.calendarCreateFailed'),
+        })
       }
     },
     openNewCalendarDialog() {
@@ -1470,8 +1494,11 @@ export default defineComponent({
         this.showGroupDialog = false
         Notify.create({ type: 'positive', message: this.$t('reservations.groupCreated') })
         await this.loadOverview()
-      } catch {
-        Notify.create({ type: 'negative', message: this.$t('reservations.groupCreateFailed') })
+      } catch (error) {
+        Notify.create({
+          type: 'negative',
+          message: this.reservationErrorMessage(error, 'reservations.groupCreateFailed'),
+        })
       }
     },
     async saveReservation() {
@@ -1501,10 +1528,10 @@ export default defineComponent({
       } catch (error) {
         Notify.create({
           type: 'negative',
-          message:
-            error?.response?.status === 409
-              ? this.$t('reservations.reservationConflict')
-              : this.$t(isEditing ? 'reservations.reservationUpdateFailed' : 'reservations.reservationCreateFailed'),
+          message: this.reservationErrorMessage(
+            error,
+            isEditing ? 'reservations.reservationUpdateFailed' : 'reservations.reservationCreateFailed',
+          ),
         })
       }
     },
@@ -1525,8 +1552,11 @@ export default defineComponent({
         this.showReservationDialog = false
         await this.loadOverview()
         Notify.create({ type: 'positive', message: this.$t('reservations.reservationDeleted') })
-      } catch {
-        Notify.create({ type: 'negative', message: this.$t('reservations.reservationDeleteFailed') })
+      } catch (error) {
+        Notify.create({
+          type: 'negative',
+          message: this.reservationErrorMessage(error, 'reservations.reservationDeleteFailed'),
+        })
       }
     },
     eventsForDate(date) {
