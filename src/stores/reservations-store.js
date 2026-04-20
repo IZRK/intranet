@@ -17,6 +17,7 @@ function normalizeCalendar(calendar) {
     sort_order: Number(calendar.sort_order || 0),
     allow_overlap: Boolean(Number(calendar.allow_overlap || 0)),
     is_active: Boolean(Number(calendar.is_active || 0)),
+    is_subscribed: Boolean(Number(calendar.is_subscribed || 0)),
   }
 }
 
@@ -48,6 +49,7 @@ export const useReservationsStore = defineStore('reservations', {
     savingCalendar: false,
     savingGroup: false,
     savingReservation: false,
+    savingSubscription: false,
   }),
 
   actions: {
@@ -169,6 +171,18 @@ export const useReservationsStore = defineStore('reservations', {
         this.reservations = this.reservations.filter((item) => item.id !== Number(payload.id))
       } finally {
         this.savingReservation = false
+      }
+    },
+
+    async toggleCalendarSubscription(calendarId) {
+      this.savingSubscription = true
+      try {
+        const { data } = await api.post('reservations/toggle_subscription', { calendar_id: calendarId })
+        const calendar = normalizeCalendar(data.calendar)
+        this.calendars = this.calendars.map((item) => (item.id === calendar.id ? calendar : item))
+        return data
+      } finally {
+        this.savingSubscription = false
       }
     },
   },

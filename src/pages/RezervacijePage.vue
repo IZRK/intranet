@@ -121,11 +121,21 @@
                         </q-item-label>
                       </q-item-section>
                       <q-item-section side top class="calendar-item-actions">
+                        <q-btn
+                          flat
+                          dense
+                          round
+                          size="sm"
+                          :icon="calendar.is_subscribed ? 'notifications' : 'notifications_off'"
+                          :color="calendar.is_subscribed ? 'positive' : 'grey-6'"
+                          :title="calendar.is_subscribed ? $t('reservations.unsubscribeCalendar') : $t('reservations.subscribeCalendar')"
+                          :loading="subscriptionCalendarId === calendar.id"
+                          @click.stop="toggleCalendarSubscription(calendar)"
+                        >
+                          <q-tooltip>{{ calendar.is_subscribed ? $t('reservations.unsubscribeCalendar') : $t('reservations.subscribeCalendar') }}</q-tooltip>
+                        </q-btn>
                         <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editCalendar')" @click.stop="openCalendarEditor(calendar)">
                           <q-tooltip>{{ $t('reservations.editCalendar') }}</q-tooltip>
-                        </q-btn>
-                        <q-btn flat dense round size="sm" icon="add" :title="$t('reservations.addForCalendar')" @click.stop="openReservationDialog({ calendarId: calendar.id })">
-                          <q-tooltip>{{ $t('reservations.addForCalendar') }}</q-tooltip>
                         </q-btn>
                         <q-btn flat dense round size="sm" icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(calendar.feed_url)">
                           <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
@@ -154,11 +164,21 @@
                     </q-item-label>
                   </q-item-section>
                   <q-item-section side top class="calendar-item-actions">
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="sm"
+                      :icon="entry.calendar.is_subscribed ? 'notifications' : 'notifications_off'"
+                      :color="entry.calendar.is_subscribed ? 'positive' : 'grey-6'"
+                      :title="entry.calendar.is_subscribed ? $t('reservations.unsubscribeCalendar') : $t('reservations.subscribeCalendar')"
+                      :loading="subscriptionCalendarId === entry.calendar.id"
+                      @click.stop="toggleCalendarSubscription(entry.calendar)"
+                    >
+                      <q-tooltip>{{ entry.calendar.is_subscribed ? $t('reservations.unsubscribeCalendar') : $t('reservations.subscribeCalendar') }}</q-tooltip>
+                    </q-btn>
                     <q-btn flat dense round size="sm" icon="edit" :title="$t('reservations.editCalendar')" @click.stop="openCalendarEditor(entry.calendar)">
                       <q-tooltip>{{ $t('reservations.editCalendar') }}</q-tooltip>
-                    </q-btn>
-                    <q-btn flat dense round size="sm" icon="add" :title="$t('reservations.addForCalendar')" @click.stop="openReservationDialog({ calendarId: entry.calendar.id })">
-                      <q-tooltip>{{ $t('reservations.addForCalendar') }}</q-tooltip>
                     </q-btn>
                     <q-btn flat dense round size="sm" icon="content_copy" :title="$t('reservations.copyFeed')" @click.stop="copyFeed(entry.calendar.feed_url)">
                       <q-tooltip>{{ $t('reservations.copyFeed') }}</q-tooltip>
@@ -714,6 +734,7 @@ export default defineComponent({
       },
       autoRefreshTimer: null,
       autoRefreshPending: false,
+      subscriptionCalendarId: null,
     }
   },
   computed: {
@@ -1535,6 +1556,25 @@ export default defineComponent({
         })
       }
     },
+    async toggleCalendarSubscription(calendar) {
+      this.subscriptionCalendarId = calendar.id
+      try {
+        const result = await this.reservations.toggleCalendarSubscription(calendar.id)
+        Notify.create({
+          type: 'positive',
+          message: this.$t(result.subscribed ? 'reservations.subscriptionEnabled' : 'reservations.subscriptionDisabled', {
+            name: calendar.name,
+          }),
+        })
+      } catch (error) {
+        Notify.create({
+          type: 'negative',
+          message: this.reservationErrorMessage(error, 'reservations.subscriptionUpdateFailed'),
+        })
+      } finally {
+        this.subscriptionCalendarId = null
+      }
+    },
     confirmDeleteReservation() {
       if (!this.currentEditedReservation()) {
         return
@@ -1847,6 +1887,10 @@ export default defineComponent({
   min-width: 24px;
   width: 24px;
   height: 24px;
+}
+
+.calendar-item-actions :deep(.q-btn .q-icon) {
+  transition: color 0.2s ease;
 }
 
 :deep(.reservation-calendar-menu) {
