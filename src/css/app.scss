@@ -558,6 +558,76 @@ body {
   line-height: 1.55;
 }
 
+.housekeeping-card {
+  position: relative;
+}
+
+.housekeeping-list {
+  padding: 4px 0;
+}
+
+.housekeeping-item {
+  align-items: flex-start;
+  padding: 18px 16px;
+  gap: 4px;
+}
+
+.housekeeping-item-done .housekeeping-title {
+  color: var(--app-muted);
+  text-decoration: line-through;
+}
+
+.housekeeping-title {
+  color: var(--app-text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.housekeeping-description {
+  margin-top: 6px;
+  color: var(--app-text);
+  line-height: 1.5;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.housekeeping-meta {
+  margin-top: 8px;
+}
+
+.housekeeping-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 6px;
+  color: var(--app-muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.housekeeping-notes {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--app-primary) 7%, var(--app-surface));
+  color: var(--app-text);
+  line-height: 1.45;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.housekeeping-dialog-card {
+  width: min(640px, 100%);
+}
+
 .history-card {
   margin-top: 24px;
 }

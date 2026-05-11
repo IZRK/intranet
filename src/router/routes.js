@@ -46,6 +46,12 @@ const routes = [
         meta: { viewKey: 'reservations' },
       },
       {
+        path: 'vzdrzevanje',
+        name: 'housekeeping',
+        component: () => import('pages/HousekeepingPage.vue'),
+        meta: { viewKey: 'housekeeping' },
+      },
+      {
         path: 'profil',
         name: 'profile',
         component: () => import('pages/ProfilePage.vue'),

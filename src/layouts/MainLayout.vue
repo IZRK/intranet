@@ -51,6 +51,7 @@
         <q-route-tab icon="home" :label="$t('app.nav.home')" to="/" exact />
         <q-route-tab icon="campaign" :label="$t('app.nav.messaging')" to="/obvescanje" />
         <q-route-tab icon="event_available" :label="$t('app.nav.reservations')" to="/rezervacije" />
+        <q-route-tab icon="handyman" :label="$t('app.nav.housekeeping')" to="/vzdrzevanje" />
         <q-tab icon="folder_copy" :label="$t('app.nav.documents')" disable aria-disabled="true">
           <q-tooltip>{{ $t('app.nav.comingSoon') }}</q-tooltip>
         </q-tab>

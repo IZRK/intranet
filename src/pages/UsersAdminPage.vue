@@ -305,6 +305,7 @@ export default defineComponent({
     roleOptions() {
       return [
         { label: this.$t('usersAdmin.roleIzrk'), value: 'izrk' },
+        { label: this.$t('usersAdmin.roleHousekeeper'), value: 'housekeeper' },
         { label: this.$t('usersAdmin.roleAdmin'), value: 'admin' },
       ]
     },
@@ -326,7 +327,15 @@ export default defineComponent({
     },
     roleLabel(roles) {
       return (roles || [])
-        .map((role) => (role === 'admin' ? this.$t('usersAdmin.roleAdmin') : role === 'izrk' ? this.$t('usersAdmin.roleIzrk') : role))
+        .map((role) => {
+          if (role === 'admin') {
+            return this.$t('usersAdmin.roleAdmin')
+          }
+          if (role === 'housekeeper') {
+            return this.$t('usersAdmin.roleHousekeeper')
+          }
+          return role === 'izrk' ? this.$t('usersAdmin.roleIzrk') : role
+        })
         .join(', ')
     },
     async loadUsers() {
