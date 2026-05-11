@@ -258,14 +258,14 @@
                     >
                       <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
                       <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
-                      <span v-if="reservationDetailsLabel(event)" class="calendar-event-meta">
-                        {{ reservationDetailsLabel(event) }}
+                      <span v-if="reservationDetailsPreview(event)" class="calendar-event-meta">
+                        {{ reservationDetailsPreview(event) }}
                       </span>
                       <span class="calendar-event-submeta">{{ reservationReserverLabel(event) }}</span>
-                      <q-tooltip class="bg-dark text-white">
+                      <q-tooltip class="bg-dark text-white calendar-event-tooltip">
                         <div>{{ reservationPrimaryLabel(event) }}</div>
                         <div>{{ reservationTimeLabel(event) }}</div>
-                        <div v-if="reservationDetailsLabel(event)">{{ reservationDetailsLabel(event) }}</div>
+                        <div v-if="reservationDetailsLabel(event)" class="calendar-event-tooltip-details">{{ reservationDetailsLabel(event) }}</div>
                         <div>{{ reservationReserverLabel(event) }}</div>
                       </q-tooltip>
                     </button>
@@ -308,8 +308,8 @@
                       >
                         <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
                         <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
-                        <span v-if="reservationDetailsLabel(event)" class="calendar-event-meta">
-                          {{ reservationDetailsLabel(event) }}
+                        <span v-if="reservationDetailsPreview(event)" class="calendar-event-meta">
+                          {{ reservationDetailsPreview(event) }}
                         </span>
                         <span class="calendar-event-submeta">{{ reservationReserverLabel(event) }}</span>
                       </button>
@@ -352,8 +352,8 @@
                     >
                       <span class="calendar-event-time">{{ reservationTimeLabel(event) }}</span>
                       <span class="calendar-event-title">{{ reservationPrimaryLabel(event) }}</span>
-                      <span v-if="reservationDetailsLabel(event)" class="calendar-event-meta">
-                        {{ reservationDetailsLabel(event) }}
+                      <span v-if="reservationDetailsPreview(event)" class="calendar-event-meta">
+                        {{ reservationDetailsPreview(event) }}
                       </span>
                       <span class="calendar-event-submeta">{{ reservationReserverLabel(event) }}</span>
                     </button>
@@ -1635,6 +1635,16 @@ export default defineComponent({
     reservationDetailsLabel(item) {
       return item.details || ''
     },
+    reservationDetailsPreview(item) {
+      const details = String(item.details || '').trim()
+      if (!details) {
+        return ''
+      }
+
+      const lines = details.split(/\r\n|\r|\n/)
+      const firstLine = String(lines[0] || '').trim()
+      return lines.length > 1 ? `${firstLine}...` : firstLine
+    },
     reservationReserverLabel(item) {
       return item.author_name || item.created_by_name || this.$t('reservations.unnamedCreator')
     },
@@ -2034,12 +2044,17 @@ export default defineComponent({
   display: grid;
   gap: 4px;
   margin-top: 18px;
+  min-width: 0;
 }
 
 .calendar-event-chip {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 0;
   border-radius: 10px;
+  box-sizing: border-box;
+  overflow: hidden;
   padding: 6px 8px;
   text-align: left;
   background: var(--event-bg);
@@ -2058,6 +2073,14 @@ export default defineComponent({
   opacity: 0.78;
 }
 
+.calendar-event-time,
+.calendar-event-title,
+.calendar-event-meta,
+.calendar-event-submeta {
+  max-width: 100%;
+  min-width: 0;
+}
+
 .calendar-event-title {
   display: block;
   font-size: 0.82rem;
@@ -2070,6 +2093,9 @@ export default defineComponent({
   margin-top: 2px;
   font-size: 0.72rem;
   opacity: 0.82;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .calendar-event-submeta {
@@ -2077,6 +2103,15 @@ export default defineComponent({
   margin-top: 2px;
   font-size: 0.72rem;
   opacity: 0.72;
+}
+
+:global(.calendar-event-tooltip) {
+  max-width: min(360px, calc(100vw - 32px));
+}
+
+:global(.calendar-event-tooltip-details) {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
 }
 
 .calendar-more-events {
