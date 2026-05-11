@@ -288,7 +288,9 @@
                 :interval-start="7"
                 :interval-minutes="60"
                 :interval-count="14"
-                :interval-height="40"
+                :interval-height="8"
+                :show-interval-label="showMobileWeekIntervalLabel"
+                hour24-format
                 :class="{ 'mobile-week-empty': !eventsForDate(date).length }"
                 @click-time="handleCalendarTimeClick"
               >
@@ -334,6 +336,7 @@
               :interval-minutes="60"
               :interval-count="14"
               :interval-height="isMobile ? 42 : 50"
+              hour24-format
               @click-time="handleCalendarTimeClick"
             >
               <template #day-body="{ scope }">
@@ -1412,6 +1415,9 @@ export default defineComponent({
     handleCalendarTimeClick(payload) {
       this.openReservationDialog({ date: payload?.scope?.timestamp?.date })
     },
+    showMobileWeekIntervalLabel(interval) {
+      return interval.minute === 0 && interval.hour !== 7 && interval.hour % 2 === 0
+    },
     openReservationDialog({ date = null, calendarId = null } = {}) {
       this.editingReservationId = null
       this.reservationForm = this.buildReservationForm({ date, calendarId })
@@ -1984,6 +1990,46 @@ export default defineComponent({
   display: grid;
   gap: 14px;
   padding: 12px;
+}
+
+.mobile-week-stack :deep(.q-calendar-day__body),
+.mobile-week-stack :deep(.q-calendar-day__scroll-area),
+.mobile-week-stack :deep(.q-calendar-day__pane),
+.mobile-week-stack :deep(.q-calendar-day__day-container),
+.mobile-week-stack :deep(.q-calendar-day__day-container > div),
+.mobile-week-stack :deep(.q-calendar-day__day) {
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.mobile-week-stack :deep(.q-calendar-day__pane) {
+  align-items: stretch;
+}
+
+.mobile-week-stack :deep(.q-calendar-day__intervals-column) {
+  align-self: stretch;
+  height: auto !important;
+}
+
+.mobile-week-stack :deep(.q-calendar-day__interval) {
+  flex: 1 1 0;
+  height: auto !important;
+  min-height: 0;
+}
+
+.mobile-week-stack :deep(.q-calendar-day__interval--text) {
+  font-size: 0.68rem;
+  line-height: 1.1;
+}
+
+.mobile-week-stack :deep(.q-calendar-day__day-interval) {
+  display: none !important;
+}
+
+.mobile-week-stack :deep(.calendar-day-mode-content) {
+  min-height: 0;
+  padding: 8px 4px 6px;
 }
 
 .mobile-week-stack :deep(.mobile-week-empty .q-calendar-day__day-container),
