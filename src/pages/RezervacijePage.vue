@@ -513,7 +513,12 @@
               <template #append>
                 <q-icon name="event" class="cursor-pointer" @click.stop="showReservationPopup('startDatePopup')">
                   <q-popup-proxy ref="startDatePopup" no-parent-event cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="reservationForm.start_date" mask="YYYY-MM-DD" />
+                    <q-date
+                      v-model="reservationForm.start_date"
+                      mask="YYYY-MM-DD"
+                      :locale="qDateLocale"
+                      :first-day-of-week="1"
+                    />
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -531,7 +536,12 @@
               <template #append>
                 <q-icon name="event" class="cursor-pointer" @click.stop="showReservationPopup('endDatePopup')">
                   <q-popup-proxy ref="endDatePopup" no-parent-event cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="reservationForm.end_date" mask="YYYY-MM-DD" />
+                    <q-date
+                      v-model="reservationForm.end_date"
+                      mask="YYYY-MM-DD"
+                      :locale="qDateLocale"
+                      :first-day-of-week="1"
+                    />
                   </q-popup-proxy>
                 </q-icon>
               </template>
@@ -583,6 +593,8 @@
 <script>
 import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
+import quasarLangEnUs from 'quasar/lang/en-US'
+import quasarLangSl from 'quasar/lang/sl'
 import { QCalendarDay, QCalendarMonth } from '@quasar/quasar-ui-qcalendar'
 import { api } from 'boot/axios'
 import { useAuthStore } from 'stores/auth-store'
@@ -590,6 +602,13 @@ import { useReservationsStore } from 'stores/reservations-store'
 import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
 const VISIBLE_CALENDAR_STORAGE_KEY = 'izrk.reservations.visible-calendars'
+const Q_DATE_LOCALES = {
+  'en-US': {
+    ...quasarLangEnUs.date,
+    firstDayOfWeek: 1,
+  },
+  'sl-SI': quasarLangSl.date,
+}
 
 function todayDate() {
   return formatLocalDate(new Date())
@@ -753,6 +772,9 @@ export default defineComponent({
         { label: this.$t('reservations.viewMonth'), value: 'month' },
         { label: this.$t('reservations.viewDay'), value: 'day' },
       ]
+    },
+    qDateLocale() {
+      return Q_DATE_LOCALES[this.$i18n.locale] || Q_DATE_LOCALES['sl-SI']
     },
     groupedCalendars() {
       const map = new Map()
