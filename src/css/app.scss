@@ -620,8 +620,30 @@ body {
   background: color-mix(in srgb, var(--app-primary) 7%, var(--app-surface));
   color: var(--app-text);
   line-height: 1.45;
-  white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+.housekeeping-notes-body {
+  min-width: 0;
+}
+
+.housekeeping-notes-text {
+  white-space: pre-line;
+}
+
+.housekeeping-note-signature {
+  margin-top: 8px;
+}
+
+.housekeeping-note-author {
+  font-style: italic;
+}
+
+.housekeeping-note-timestamp {
+  margin-top: 1px;
+  color: var(--app-muted);
+  font-size: 0.68rem;
+  line-height: 1.2;
 }
 
 .housekeeping-dialog-card {

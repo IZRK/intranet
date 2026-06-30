@@ -66,7 +66,17 @@
             </div>
             <div v-if="item.housekeeper_notes" class="housekeeping-notes">
               <q-icon name="sticky_note_2" size="18px" />
-              <span>{{ item.housekeeper_notes }}</span>
+              <div class="housekeeping-notes-body">
+                <div class="housekeeping-notes-text">{{ item.housekeeper_notes }}</div>
+                <div v-if="item.housekeeper_notes_author_name || item.housekeeper_notes_at" class="housekeeping-note-signature">
+                  <div v-if="item.housekeeper_notes_author_name" class="housekeeping-note-author">
+                    ~ {{ item.housekeeper_notes_author_name }}
+                  </div>
+                  <div v-if="item.housekeeper_notes_at" class="housekeeping-note-timestamp">
+                    {{ formatNoteTimestamp(item.housekeeper_notes_at) }}
+                  </div>
+                </div>
+              </div>
             </div>
           </q-item-section>
 
@@ -239,6 +249,16 @@ export default defineComponent({
         timeStyle: 'short',
       }).format(new Date(normalizedValue))
     },
+    formatNoteTimestamp(value) {
+      if (!value) {
+        return ''
+      }
+
+      const date = new Date(typeof value === 'string' ? value.replace(' ', 'T') : value)
+      const pad = (part) => String(part).padStart(2, '0')
+
+      return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+    },
     canEdit(item) {
       return Number(item.created_by) === Number(this.auth.user?.id)
     },
@@ -307,7 +327,6 @@ export default defineComponent({
         await api.post('housekeeping/update_status', {
           id: item.id,
           is_done: Boolean(value),
-          housekeeper_notes: item.housekeeper_notes || '',
         })
         await this.loadItems()
       } catch {

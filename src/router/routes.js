@@ -52,6 +52,12 @@ const routes = [
         meta: { viewKey: 'housekeeping' },
       },
       {
+        path: 'narocila',
+        name: 'equipment-orders',
+        component: () => import('pages/NarocilaPage.vue'),
+        meta: { viewKey: 'equipment_orders' },
+      },
+      {
         path: 'profil',
         name: 'profile',
         component: () => import('pages/ProfilePage.vue'),

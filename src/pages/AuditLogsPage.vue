@@ -561,6 +561,8 @@ export default defineComponent({
         home: this.$t('app.nav.home'),
         messaging: this.$t('app.nav.messaging'),
         reservations: this.$t('app.nav.reservations'),
+        housekeeping: this.$t('app.nav.housekeeping'),
+        equipment_orders: this.$t('app.nav.equipmentOrders'),
         profile: this.$t('app.profile'),
         users_admin: this.$t('app.usersAdmin'),
         audit_logs: this.$t('app.auditLogs'),
