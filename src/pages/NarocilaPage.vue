@@ -62,6 +62,7 @@
         v-if="!loadError && filteredItems.length"
         flat
         class="equipment-orders-table"
+        :class="{ 'equipment-orders-table-hidden': $q.screen.width < 1200 }"
         row-key="id"
         :rows="filteredItems"
         :columns="columns"
@@ -168,6 +169,109 @@
           </q-td>
         </template>
       </q-table>
+
+      <q-list
+        v-if="!loadError && filteredItems.length && $q.screen.width < 1200"
+        separator
+        class="equipment-orders-list"
+      >
+        <q-item
+          v-for="item in filteredItems"
+          :key="item.id"
+          class="equipment-orders-list-item"
+          :class="orderRowClass(item)"
+        >
+          <q-item-section>
+            <div class="equipment-orders-list-header">
+              <div>
+                <div class="equipment-orders-gear">{{ item.gear_name }}</div>
+                <div class="equipment-orders-secondary">
+                  {{ item.requester_name || $t('equipmentOrders.unknownUser') }}
+                </div>
+                <div v-if="item.creator_name && item.creator_name !== item.requester_name" class="equipment-orders-secondary">
+                  {{ $t('equipmentOrders.enteredBy', { name: item.creator_name }) }}
+                </div>
+              </div>
+              <div class="equipment-orders-list-actions">
+                <q-btn
+                  v-if="canEdit(item)"
+                  flat
+                  dense
+                  round
+                  color="primary"
+                  icon="edit"
+                  :aria-label="$t('equipmentOrders.editOrder')"
+                  @click="openEditDialog(item)"
+                >
+                  <q-tooltip>{{ $t('equipmentOrders.editOrder') }}</q-tooltip>
+                </q-btn>
+                <q-btn
+                  v-if="canDelete(item)"
+                  flat
+                  dense
+                  round
+                  color="negative"
+                  icon="delete"
+                  :aria-label="$t('equipmentOrders.deleteOrder')"
+                  @click="removeOrder(item)"
+                >
+                  <q-tooltip>{{ $t('equipmentOrders.deleteOrder') }}</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+
+            <div class="equipment-orders-list-meta">
+              <div>
+                <span class="equipment-orders-list-label">{{ $t('equipmentOrders.date') }}</span>
+                <span>{{ formatDate(item.created_at) }}</span>
+              </div>
+              <div>
+                <span class="equipment-orders-list-label">{{ $t('equipmentOrders.updatedAt') }}</span>
+                <span>{{ formatDate(item.updated_at) }}</span>
+              </div>
+            </div>
+
+            <div v-if="item.notes" class="equipment-orders-notes equipment-orders-list-notes">
+              <q-icon name="sticky_note_2" size="18px" />
+              <div class="equipment-orders-notes-body">
+                <div class="equipment-orders-notes-text">{{ item.notes }}</div>
+                <div v-if="item.notes_author_name || item.notes_at" class="equipment-orders-note-signature">
+                  <div v-if="item.notes_author_name" class="equipment-orders-note-author">
+                    ~ {{ item.notes_author_name }}
+                  </div>
+                  <div v-if="item.notes_at" class="equipment-orders-note-timestamp">
+                    {{ formatNoteTimestamp(item.notes_at) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="equipment-orders-secondary">{{ $t('equipmentOrders.noNotes') }}</div>
+
+            <div class="equipment-orders-list-state">
+              <q-option-group
+                :model-value="item.state"
+                type="radio"
+                dense
+                inline
+                :disable="!auth.isHousekeeper || stateSavingId === item.id"
+                :options="stateOptions"
+                @update:model-value="updateState(item, $event)"
+              />
+              <q-btn
+                v-if="auth.isHousekeeper"
+                class="equipment-orders-note-btn"
+                flat
+                dense
+                no-caps
+                color="primary"
+                icon="edit_note"
+                :label="$t('equipmentOrders.editNotes')"
+                @click="openStateDialog(item)"
+              />
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
     </q-card>
 
     <q-dialog v-model="editorOpen" :maximized="$q.screen.lt.sm" @hide="closeEditor">
@@ -598,7 +702,7 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .equipment-orders-card {
   position: relative;
 }
@@ -613,6 +717,10 @@ export default defineComponent({
 
 .equipment-orders-table {
   width: 100%;
+}
+
+.equipment-orders-table-hidden {
+  display: none;
 }
 
 .equipment-orders-gear {
@@ -670,6 +778,61 @@ export default defineComponent({
   padding-left: 0;
 }
 
+.equipment-orders-list {
+  display: none;
+}
+
+.equipment-orders-list-item {
+  padding: 14px 16px;
+}
+
+.equipment-orders-list-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.equipment-orders-list-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.equipment-orders-list-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  margin-top: 10px;
+  color: var(--app-text);
+  font-size: 0.85rem;
+}
+
+.equipment-orders-list-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--app-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.equipment-orders-list-notes {
+  width: 100%;
+  max-width: none;
+  margin-top: 12px;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.equipment-orders-list-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
 .equipment-orders-state-cell {
   width: 92px;
 }
@@ -696,5 +859,54 @@ export default defineComponent({
 :deep(.equipment-orders-row-arrived .equipment-orders-note-signature),
 :deep(.equipment-orders-row-arrived .equipment-orders-note-timestamp) {
   text-decoration: none;
+}
+
+@media (max-width: 1199px) {
+  .equipment-orders-toolbar {
+    padding: 16px;
+  }
+
+  .equipment-orders-search {
+    max-width: none;
+  }
+
+  .equipment-orders-list {
+    display: block;
+  }
+
+  :deep(.equipment-orders-list-state .q-option-group) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 10px;
+    flex: 1 1 280px;
+  }
+
+  :deep(.equipment-orders-list-state .q-radio) {
+    min-height: 32px;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .equipment-orders-list-item {
+    padding: 12px;
+  }
+
+  .equipment-orders-list-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .equipment-orders-list-state {
+    align-items: stretch;
+  }
+
+  :deep(.equipment-orders-list-state .q-option-group) {
+    grid-template-columns: 1fr;
+    flex-basis: 100%;
+  }
+
+  .equipment-orders-note-btn {
+    align-self: flex-start;
+  }
 }
 </style>
