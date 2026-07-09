@@ -176,15 +176,15 @@
             <template #body-cell-status_short="props">
               <q-td :props="props">
                 <span class="kadris-status-label">
-                  <span class="kadris-status-emoji" aria-hidden="true">{{ props.row.status_emoji }}</span>
-                  <span>{{ statusShortLabel(props.row) }}</span>
+                  <span class="kadris-status-emoji" aria-hidden="true">{{ statusEmoji(props.row) }}</span>
+                  <span v-if="statusShortLabel(props.row)">{{ statusShortLabel(props.row) }}</span>
                 </span>
               </q-td>
             </template>
 
             <template #body-cell-status_label="props">
               <q-td :props="props">
-                <span class="kadris-cell-text">{{ props.row.status_label }}</span>
+                <span class="kadris-cell-text">{{ longStatusLabel(props.row) }}</span>
               </q-td>
             </template>
 
@@ -211,7 +211,6 @@
 <script>
 import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
-import { api } from 'boot/axios'
 import { i18n } from 'boot/i18n'
 import { useBulletinStore } from 'stores/bulletin-store'
 import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
@@ -362,7 +361,6 @@ export default defineComponent({
   async mounted() {
     await this.bulletin.loadPage()
     await this.loadKadrisStatuses()
-    this.recordHomePanelViews()
     this.syncDraft()
     this.startAutoRefresh()
   },
@@ -410,17 +408,10 @@ export default defineComponent({
         return
       }
 
-      const previousSnapshot = this.createAutoRefreshSnapshot()
       this.autoRefreshPending = true
 
       try {
         await this.refreshPageState()
-        if (previousSnapshot !== this.createAutoRefreshSnapshot()) {
-          Notify.create({
-            type: 'info',
-            message: this.$t('app.autoRefreshNotice'),
-          })
-        }
       } finally {
         this.autoRefreshPending = false
       }
@@ -452,7 +443,6 @@ export default defineComponent({
         if (this.showHistory) {
           await this.bulletin.loadHistory()
         }
-        Notify.create({ type: 'positive', message: this.$t('home.saveSuccess') })
       } catch {
         Notify.create({ type: 'negative', message: this.$t('home.saveFailed') })
       }
@@ -476,26 +466,6 @@ export default defineComponent({
       } catch {
         Notify.create({ type: 'negative', message: this.$t('home.statusesLoadFailed') })
       }
-    },
-    recordHomePanelViews() {
-      void Promise.all([
-        this.recordView('home_bulletin', this.$t('home.bulletinPanelTitle')),
-        this.recordView('home_attendance', this.$t('home.statusesTitle')),
-      ])
-    },
-    recordView(pageKey, label) {
-      return api
-        .post('audit/view', {
-          page_key: pageKey,
-          route_name: 'home',
-          route_path: this.$route?.fullPath || '/',
-          resource_label: label,
-          summary: `Viewed ${label}`,
-          context: {
-            panel: pageKey,
-          },
-        })
-        .catch(() => {})
     },
     revisionMeta(item) {
       return this.$t('home.revisionMeta', {
@@ -522,13 +492,26 @@ export default defineComponent({
       }).format(new Date(value.replace(' ', 'T')))
     },
     statusShortLabel(row) {
+      if (this.isZanKafol(row)) {
+        return ''
+      }
       if (!row.status_code || row.status_code === 'NO_DATA') {
         return this.$t('home.statusShortUnknown')
       }
 
       return row.status_code
     },
+    statusEmoji(row) {
+      return this.isZanKafol(row) ? '🦅' : row.status_emoji
+    },
+    longStatusLabel(row) {
+      return this.isZanKafol(row) ? this.$t('home.omnipresent') : row.status_label
+    },
+    isZanKafol(row) {
+      return Number(row.user_id) === 2
+    },
     availabilityState(row) {
+      if (this.isZanKafol(row)) return 'external'
       if (['office', 'home', 'business_trip'].includes(row.status_group)) return 'present'
       if (['leave', 'sick_leave'].includes(row.status_group)) return 'away'
       return 'unknown'
@@ -537,6 +520,7 @@ export default defineComponent({
       const state = this.availabilityState(row)
       if (state === 'present') return this.$t('home.availabilityPresent')
       if (state === 'away') return this.$t('home.availabilityAway')
+      if (state === 'external') return this.$t('home.availabilityExternal')
       return this.$t('home.availabilityUnknown')
     },
     formatTime(value) {

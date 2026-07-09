@@ -926,6 +926,12 @@ body {
   color: color-mix(in srgb, var(--q-warning) 58%, #4a3510);
 }
 
+.availability-external {
+  background: color-mix(in srgb, var(--q-info) 18%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--q-info) 42%, transparent);
+  color: color-mix(in srgb, var(--q-info) 76%, #12385d);
+}
+
 @media (max-width: 900px) {
   .home-grid {
     grid-template-columns: 1fr;
