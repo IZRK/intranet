@@ -190,7 +190,7 @@
 
             <template #body-cell-started_at="props">
               <q-td :props="props">
-                <span class="kadris-cell-text">{{ formatTime(props.row.started_at) || $t('home.statusAllDay') }}</span>
+                <span class="kadris-cell-text">{{ attendanceTime(props.row) || $t('home.statusAllDay') }}</span>
               </q-td>
             </template>
 
@@ -334,8 +334,25 @@ export default defineComponent({
         { name: 'user_name', label: this.$t('home.statusUser'), field: 'user_name', align: 'left', sortable: true },
         { name: 'status_short', label: this.$t('home.statusShort'), field: 'status_code', align: 'left', sortable: true },
         { name: 'status_label', label: this.$t('home.statusLong'), field: 'status_label', align: 'left', sortable: true },
-        { name: 'started_at', label: this.$t('home.statusStart'), field: 'started_at', align: 'left', sortable: true },
-        { name: 'availability', label: this.$t('home.statusAvailability'), field: 'status_group', align: 'left', sortable: true },
+        {
+          name: 'started_at',
+          label: this.$t('home.statusStart'),
+          field: this.attendanceTimeValue,
+          align: 'left',
+          sortable: true,
+          sort: (left, right, rowLeft, rowRight) => this.attendanceTimeSortValue(rowLeft) - this.attendanceTimeSortValue(rowRight),
+        },
+        {
+          name: 'availability',
+          label: this.$t('home.statusAvailability'),
+          field: this.availabilityState,
+          align: 'left',
+          sortable: true,
+          sort: (left, right, rowLeft, rowRight) => {
+            const diff = this.availabilitySortValue(rowLeft) - this.availabilitySortValue(rowRight)
+            return diff || String(rowLeft.user_name || '').localeCompare(String(rowRight.user_name || ''), this.$i18n.locale)
+          },
+        },
       ]
     },
     bulletinMeta() {
@@ -495,6 +512,9 @@ export default defineComponent({
       if (this.isZanKafol(row)) {
         return ''
       }
+      if (this.isFinishedWork(row)) {
+        return ''
+      }
       if (!row.status_code || row.status_code === 'NO_DATA') {
         return this.$t('home.statusShortUnknown')
       }
@@ -505,22 +525,60 @@ export default defineComponent({
       return this.isZanKafol(row) ? '🦅' : row.status_emoji
     },
     longStatusLabel(row) {
-      return this.isZanKafol(row) ? this.$t('home.omnipresent') : row.status_label
+      return this.isZanKafol(row) ? this.$t('home.availabilityExternal') : row.status_label
     },
     isZanKafol(row) {
       return Number(row.user_id) === 2
     },
+    isFinishedWork(row) {
+      return row.status_code === 'FINISHED_WORK' || row.status_group === 'finished_work'
+    },
+    isFullDayAbsence(row) {
+      return ['leave', 'sick_leave'].includes(row.status_group)
+    },
+    attendanceTimeValue(row) {
+      if (this.isFullDayAbsence(row)) {
+        return null
+      }
+      return this.isFinishedWork(row) ? row.ended_at : row.started_at
+    },
+    attendanceTime(row) {
+      return this.formatTime(this.attendanceTimeValue(row))
+    },
+    attendanceTimeSortValue(row) {
+      if (this.isFullDayAbsence(row)) {
+        return 0
+      }
+
+      const value = this.attendanceTimeValue(row)
+      if (!value) {
+        return Number.MAX_SAFE_INTEGER
+      }
+
+      const timestamp = new Date(value.replace(' ', 'T')).getTime()
+      return Number.isFinite(timestamp) ? timestamp : Number.MAX_SAFE_INTEGER
+    },
     availabilityState(row) {
       if (this.isZanKafol(row)) return 'external'
       if (['office', 'home', 'business_trip'].includes(row.status_group)) return 'present'
-      if (['leave', 'sick_leave'].includes(row.status_group)) return 'away'
+      if (['leave', 'sick_leave', 'finished_work'].includes(row.status_group)) return 'away'
       return 'unknown'
+    },
+    availabilitySortValue(row) {
+      const ranks = {
+        present: 1,
+        external: 2,
+        away: 3,
+        unknown: 4,
+      }
+
+      return ranks[this.availabilityState(row)] || ranks.unknown
     },
     availabilityLabel(row) {
       const state = this.availabilityState(row)
       if (state === 'present') return this.$t('home.availabilityPresent')
       if (state === 'away') return this.$t('home.availabilityAway')
-      if (state === 'external') return this.$t('home.availabilityExternal')
+      if (state === 'external') return this.$t('home.omnipresent')
       return this.$t('home.availabilityUnknown')
     },
     formatTime(value) {
