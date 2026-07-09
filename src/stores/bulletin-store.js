@@ -5,11 +5,15 @@ export const useBulletinStore = defineStore('bulletin', {
   state: () => ({
     page: null,
     history: [],
+    kadrisStatuses: [],
+    kadrisStatusDate: null,
+    kadrisSyncedAt: null,
     historyTotal: 0,
     historyHasMore: false,
     loading: false,
     saving: false,
     historyLoading: false,
+    kadrisLoading: false,
   }),
 
   actions: {
@@ -45,6 +49,20 @@ export const useBulletinStore = defineStore('bulletin', {
         return data
       } finally {
         this.historyLoading = false
+      }
+    },
+
+    async loadKadrisStatuses(date = null) {
+      this.kadrisLoading = true
+      try {
+        const config = date ? { params: { date } } : undefined
+        const { data } = await api.get('kadris_status/current', config)
+        this.kadrisStatuses = data.items || []
+        this.kadrisStatusDate = data.date || null
+        this.kadrisSyncedAt = data.synced_at || null
+        return data
+      } finally {
+        this.kadrisLoading = false
       }
     },
   },

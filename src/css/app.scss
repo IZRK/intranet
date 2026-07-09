@@ -721,6 +721,17 @@ body {
   min-height: 320px;
 }
 
+.home-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.home-grid-column {
+  min-width: 0;
+}
+
 .bulletin-view {
   position: relative;
   padding: 28px;
@@ -840,6 +851,85 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.kadris-status-card {
+  overflow: hidden;
+}
+
+.kadris-status-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kadris-status-table {
+  color: var(--app-text);
+}
+
+.kadris-status-table .q-table__top,
+.kadris-status-table thead tr,
+.kadris-status-table tbody td {
+  background: var(--app-surface);
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.kadris-status-table thead th {
+  color: var(--app-muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kadris-cell-text {
+  display: block;
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kadris-status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kadris-status-emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.availability-badge {
+  border: 1px solid transparent;
+  font-weight: 700;
+}
+
+.availability-present {
+  background: color-mix(in srgb, var(--q-positive) 16%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--q-positive) 35%, transparent);
+  color: color-mix(in srgb, var(--q-positive) 72%, #14351d);
+}
+
+.availability-away {
+  background: color-mix(in srgb, var(--q-negative) 14%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--q-negative) 34%, transparent);
+  color: color-mix(in srgb, var(--q-negative) 72%, #4c1111);
+}
+
+.availability-unknown {
+  background: color-mix(in srgb, var(--q-warning) 22%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--q-warning) 42%, transparent);
+  color: color-mix(in srgb, var(--q-warning) 58%, #4a3510);
+}
+
+@media (max-width: 900px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .history-diff-summary {

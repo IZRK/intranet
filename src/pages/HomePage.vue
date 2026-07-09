@@ -8,129 +8,210 @@
       </div>
     </section>
 
-    <q-card flat bordered class="panel-card bulletin-card">
-      <q-card-section v-if="editing" class="q-gutter-md">
-        <q-input v-model="draft.title" outlined :label="$t('home.editorTitle')" />
-        <q-editor
-          v-model="draft.body"
-          min-height="20rem"
-          :toolbar="editorToolbar"
-          :fonts="editorFonts"
-        />
-        <div class="bulletin-editor-actions">
-          <q-btn
-            unelevated
-            color="primary"
-            :label="$t('home.save')"
-            :loading="bulletin.saving"
-            @click="save"
-          />
-          <q-btn flat no-caps color="primary" :label="$t('home.cancelEdit')" @click="cancelEdit" />
-        </div>
-      </q-card-section>
-
-      <q-card-section v-else class="bulletin-view">
-        <q-btn
-          flat
-          round
-          dense
-          color="primary"
-          icon="edit"
-          class="bulletin-edit-button"
-          :aria-label="$t('home.edit')"
-          @click="toggleEdit"
-        >
-          <q-tooltip>{{ $t('home.edit') }}</q-tooltip>
-        </q-btn>
-        <div class="bulletin-html" v-html="bulletin.page?.body"></div>
-      </q-card-section>
-    </q-card>
-
-    <button
-      v-if="!editing && bulletin.page?.updated_at"
-      type="button"
-      class="bulletin-meta bulletin-meta-link bulletin-meta-outside"
-      @click="toggleHistory"
-    >
-      {{ bulletinMeta }}
-    </button>
-
-    <q-card v-if="showHistory" flat bordered class="panel-card history-card">
-      <q-card-section class="row items-center justify-between">
-        <div>
-          <div class="panel-title">{{ $t('home.historyTitle') }}</div>
-          <div class="panel-subtitle">{{ $t('home.historySubtitle') }}</div>
-        </div>
-        <q-btn
-          v-if="bulletin.historyHasMore"
-          flat
-          no-caps
-          color="primary"
-          :label="$t('home.showMoreHistory')"
-          :loading="bulletin.historyLoading"
-          @click="loadMoreHistory"
-        />
-      </q-card-section>
-
-      <q-card-section v-if="!bulletin.history.length && !bulletin.historyLoading">
-        <q-banner rounded class="banner-info">
-          {{ $t('home.noHistory') }}
-        </q-banner>
-      </q-card-section>
-
-      <q-list v-else separator class="history-list">
-        <q-expansion-item
-          v-for="item in bulletin.history"
-          :key="item.id"
-          class="history-item"
-          expand-separator
-          switch-toggle-side
-          header-class="history-item-header"
-        >
-          <template #header>
-            <q-item-section>
-              <q-item-label class="history-snippet">{{ revisionSnippet(item.body) }}</q-item-label>
-              <q-item-label caption>{{ revisionMeta(item) }}</q-item-label>
-              <q-item-label caption class="history-diff-summary">{{ diffSummary(item) }}</q-item-label>
-            </q-item-section>
-          </template>
-
-          <q-card flat class="history-body">
-            <q-card-section class="q-gutter-md">
-              <div class="history-subject">{{ item.title }}</div>
-              <div class="bulletin-html" v-html="item.body"></div>
+    <div class="home-grid">
+      <section class="home-grid-column">
+        <q-card flat bordered class="panel-card bulletin-card">
+          <q-card-section v-if="editing" class="q-gutter-md">
+            <q-input v-model="draft.title" outlined :label="$t('home.editorTitle')" />
+            <q-editor
+              v-model="draft.body"
+              min-height="20rem"
+              :toolbar="editorToolbar"
+              :fonts="editorFonts"
+            />
+            <div class="bulletin-editor-actions">
               <q-btn
-                flat
-                no-caps
+                unelevated
                 color="primary"
-                :label="expandedDiffs[item.id] ? $t('home.hideFullDiff') : $t('home.showFullDiff')"
-                @click.stop="toggleFullDiff(item.id)"
+                :label="$t('home.save')"
+                :loading="bulletin.saving"
+                @click="save"
               />
-              <div v-if="expandedDiffs[item.id]" class="diff-table-wrap">
-                <table class="diff-table">
-                  <tbody>
-                    <tr
-                      v-for="(row, index) in diffRows(item)"
-                      :key="`${item.id}-${index}`"
-                      :class="`diff-row-${row.type}`"
-                    >
-                      <td class="diff-marker">{{ diffMarker(row.type) }}</td>
-                      <td class="diff-line" v-text="row.text || ' '"></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-      </q-list>
-    </q-card>
+              <q-btn flat no-caps color="primary" :label="$t('home.cancelEdit')" @click="cancelEdit" />
+            </div>
+          </q-card-section>
+
+          <q-card-section v-else class="bulletin-view">
+            <q-btn
+              flat
+              round
+              dense
+              color="primary"
+              icon="edit"
+              class="bulletin-edit-button"
+              :aria-label="$t('home.edit')"
+              @click="toggleEdit"
+            >
+              <q-tooltip>{{ $t('home.edit') }}</q-tooltip>
+            </q-btn>
+            <div class="bulletin-html" v-html="bulletin.page?.body"></div>
+          </q-card-section>
+        </q-card>
+
+        <button
+          v-if="!editing && bulletin.page?.updated_at"
+          type="button"
+          class="bulletin-meta bulletin-meta-link bulletin-meta-outside"
+          @click="toggleHistory"
+        >
+          {{ bulletinMeta }}
+        </button>
+
+        <q-card v-if="showHistory" flat bordered class="panel-card history-card">
+          <q-card-section class="row items-center justify-between">
+            <div>
+              <div class="panel-title">{{ $t('home.historyTitle') }}</div>
+              <div class="panel-subtitle">{{ $t('home.historySubtitle') }}</div>
+            </div>
+            <q-btn
+              v-if="bulletin.historyHasMore"
+              flat
+              no-caps
+              color="primary"
+              :label="$t('home.showMoreHistory')"
+              :loading="bulletin.historyLoading"
+              @click="loadMoreHistory"
+            />
+          </q-card-section>
+
+          <q-card-section v-if="!bulletin.history.length && !bulletin.historyLoading">
+            <q-banner rounded class="banner-info">
+              {{ $t('home.noHistory') }}
+            </q-banner>
+          </q-card-section>
+
+          <q-list v-else separator class="history-list">
+            <q-expansion-item
+              v-for="item in bulletin.history"
+              :key="item.id"
+              class="history-item"
+              expand-separator
+              switch-toggle-side
+              header-class="history-item-header"
+            >
+              <template #header>
+                <q-item-section>
+                  <q-item-label class="history-snippet">{{ revisionSnippet(item.body) }}</q-item-label>
+                  <q-item-label caption>{{ revisionMeta(item) }}</q-item-label>
+                  <q-item-label caption class="history-diff-summary">{{ diffSummary(item) }}</q-item-label>
+                </q-item-section>
+              </template>
+
+              <q-card flat class="history-body">
+                <q-card-section class="q-gutter-md">
+                  <div class="history-subject">{{ item.title }}</div>
+                  <div class="bulletin-html" v-html="item.body"></div>
+                  <q-btn
+                    flat
+                    no-caps
+                    color="primary"
+                    :label="expandedDiffs[item.id] ? $t('home.hideFullDiff') : $t('home.showFullDiff')"
+                    @click.stop="toggleFullDiff(item.id)"
+                  />
+                  <div v-if="expandedDiffs[item.id]" class="diff-table-wrap">
+                    <table class="diff-table">
+                      <tbody>
+                        <tr
+                          v-for="(row, index) in diffRows(item)"
+                          :key="`${item.id}-${index}`"
+                          :class="`diff-row-${row.type}`"
+                        >
+                          <td class="diff-marker">{{ diffMarker(row.type) }}</td>
+                          <td class="diff-line" v-text="row.text || ' '"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
+          </q-list>
+        </q-card>
+      </section>
+
+      <section class="home-grid-column">
+        <q-card flat bordered class="panel-card kadris-status-card">
+          <q-card-section class="kadris-status-toolbar">
+            <div>
+              <div class="panel-title">{{ $t('home.statusesTitle') }}</div>
+              <div class="panel-subtitle">{{ kadrisMeta }}</div>
+            </div>
+            <q-btn
+              flat
+              round
+              dense
+              color="primary"
+              icon="refresh"
+              :aria-label="$t('home.refreshStatuses')"
+              :loading="bulletin.kadrisLoading"
+              @click="loadKadrisStatuses"
+            >
+              <q-tooltip>{{ $t('home.refreshStatuses') }}</q-tooltip>
+            </q-btn>
+          </q-card-section>
+
+          <q-card-section v-if="!bulletin.kadrisLoading && !bulletin.kadrisStatuses.length">
+            <q-banner rounded class="banner-info">
+              {{ $t('home.noStatuses') }}
+            </q-banner>
+          </q-card-section>
+
+          <q-table
+            v-else
+            flat
+            :rows="bulletin.kadrisStatuses"
+            :columns="statusColumns"
+            row-key="id"
+            :loading="bulletin.kadrisLoading"
+            :pagination="{ rowsPerPage: 0 }"
+            hide-pagination
+            class="kadris-status-table"
+          >
+            <template #body-cell-user_name="props">
+              <q-td :props="props">
+                <span class="kadris-cell-text">{{ props.row.user_name }}</span>
+              </q-td>
+            </template>
+
+            <template #body-cell-status_short="props">
+              <q-td :props="props">
+                <span class="kadris-status-label">
+                  <span class="kadris-status-emoji" aria-hidden="true">{{ props.row.status_emoji }}</span>
+                  <span>{{ statusShortLabel(props.row) }}</span>
+                </span>
+              </q-td>
+            </template>
+
+            <template #body-cell-status_label="props">
+              <q-td :props="props">
+                <span class="kadris-cell-text">{{ props.row.status_label }}</span>
+              </q-td>
+            </template>
+
+            <template #body-cell-started_at="props">
+              <q-td :props="props">
+                <span class="kadris-cell-text">{{ formatTime(props.row.started_at) || $t('home.statusAllDay') }}</span>
+              </q-td>
+            </template>
+
+            <template #body-cell-availability="props">
+              <q-td :props="props">
+                <q-badge :class="`availability-badge availability-${availabilityState(props.row)}`" rounded>
+                  {{ availabilityLabel(props.row) }}
+                </q-badge>
+              </q-td>
+            </template>
+          </q-table>
+        </q-card>
+      </section>
+    </div>
   </q-page>
 </template>
 
 <script>
 import { defineComponent } from 'vue'
 import { Notify } from 'quasar'
+import { api } from 'boot/axios'
 import { i18n } from 'boot/i18n'
 import { useBulletinStore } from 'stores/bulletin-store'
 import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
@@ -249,6 +330,15 @@ export default defineComponent({
     }
   },
   computed: {
+    statusColumns() {
+      return [
+        { name: 'user_name', label: this.$t('home.statusUser'), field: 'user_name', align: 'left', sortable: true },
+        { name: 'status_short', label: this.$t('home.statusShort'), field: 'status_code', align: 'left', sortable: true },
+        { name: 'status_label', label: this.$t('home.statusLong'), field: 'status_label', align: 'left', sortable: true },
+        { name: 'started_at', label: this.$t('home.statusStart'), field: 'started_at', align: 'left', sortable: true },
+        { name: 'availability', label: this.$t('home.statusAvailability'), field: 'status_group', align: 'left', sortable: true },
+      ]
+    },
     bulletinMeta() {
       if (!this.bulletin.page?.updated_at) {
         return ''
@@ -259,9 +349,20 @@ export default defineComponent({
         date: this.formatDate(this.bulletin.page.updated_at),
       })
     },
+    kadrisMeta() {
+      if (!this.bulletin.kadrisSyncedAt) {
+        return this.$t('home.statusesNotSynced')
+      }
+
+      return this.$t('home.statusesSyncedAt', {
+        date: this.formatDate(this.bulletin.kadrisSyncedAt),
+      })
+    },
   },
   async mounted() {
     await this.bulletin.loadPage()
+    await this.loadKadrisStatuses()
+    this.recordHomePanelViews()
     this.syncDraft()
     this.startAutoRefresh()
   },
@@ -287,6 +388,8 @@ export default defineComponent({
     createAutoRefreshSnapshot() {
       return buildSnapshot({
         page: this.bulletin.page,
+        kadrisStatuses: this.bulletin.kadrisStatuses,
+        kadrisSyncedAt: this.bulletin.kadrisSyncedAt,
         history: this.showHistory ? this.bulletin.history : [],
         historyHasMore: this.showHistory ? this.bulletin.historyHasMore : false,
         historyTotal: this.showHistory ? this.bulletin.historyTotal : 0,
@@ -294,6 +397,7 @@ export default defineComponent({
     },
     async refreshPageState() {
       await this.bulletin.loadPage()
+      await this.loadKadrisStatuses()
 
       if (this.showHistory) {
         await this.bulletin.loadHistory({
@@ -366,6 +470,33 @@ export default defineComponent({
         append: true,
       })
     },
+    async loadKadrisStatuses() {
+      try {
+        await this.bulletin.loadKadrisStatuses()
+      } catch {
+        Notify.create({ type: 'negative', message: this.$t('home.statusesLoadFailed') })
+      }
+    },
+    recordHomePanelViews() {
+      void Promise.all([
+        this.recordView('home_bulletin', this.$t('home.bulletinPanelTitle')),
+        this.recordView('home_attendance', this.$t('home.statusesTitle')),
+      ])
+    },
+    recordView(pageKey, label) {
+      return api
+        .post('audit/view', {
+          page_key: pageKey,
+          route_name: 'home',
+          route_path: this.$route?.fullPath || '/',
+          resource_label: label,
+          summary: `Viewed ${label}`,
+          context: {
+            panel: pageKey,
+          },
+        })
+        .catch(() => {})
+    },
     revisionMeta(item) {
       return this.$t('home.revisionMeta', {
         author: item.author_name || this.$t('home.unknownAuthor'),
@@ -388,6 +519,34 @@ export default defineComponent({
       return new Intl.DateTimeFormat(this.$i18n.locale, {
         dateStyle: 'medium',
         timeStyle: 'short',
+      }).format(new Date(value.replace(' ', 'T')))
+    },
+    statusShortLabel(row) {
+      if (!row.status_code || row.status_code === 'NO_DATA') {
+        return this.$t('home.statusShortUnknown')
+      }
+
+      return row.status_code
+    },
+    availabilityState(row) {
+      if (['office', 'home', 'business_trip'].includes(row.status_group)) return 'present'
+      if (['leave', 'sick_leave'].includes(row.status_group)) return 'away'
+      return 'unknown'
+    },
+    availabilityLabel(row) {
+      const state = this.availabilityState(row)
+      if (state === 'present') return this.$t('home.availabilityPresent')
+      if (state === 'away') return this.$t('home.availabilityAway')
+      return this.$t('home.availabilityUnknown')
+    },
+    formatTime(value) {
+      if (!value) {
+        return ''
+      }
+
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        hour: '2-digit',
+        minute: '2-digit',
       }).format(new Date(value.replace(' ', 'T')))
     },
     diffRows(item) {
