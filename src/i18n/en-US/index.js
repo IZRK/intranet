@@ -99,6 +99,9 @@ export default {
     availabilityExternal: 'External collaborator',
     statusAllDay: 'All day',
   },
+  documents: {
+    title: 'Documents', categories: 'Categories', newCategory: 'New category', renameCategory: 'Rename category', deleteCategory: 'Delete category', deleteCategoryConfirm: 'Delete this category and all of its attachments?', attachments: 'Attachments', noAttachments: 'There are no attachments in this category yet.', dropFiles: 'Drop files here', chooseFiles: 'Choose files', editorTitle: 'Document title', edit: 'Edit', save: 'Save', cancel: 'Cancel', saved: 'Document updated.', saveFailed: 'Document could not be saved.', history: 'Revision history', lastUpdatedBy: 'Last updated by {author} · {date}', renameFile: 'Rename file', deleteFile: 'Delete file', uploadFailed: 'Failed to upload {name}.', categoryFailed: 'Category could not be created.',
+  },
   messaging: {
     title: 'Messaging',
     lead: 'Create recipient lists and prepare messages for email or SMS.',

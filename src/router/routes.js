@@ -62,6 +62,12 @@ const routes = [
         meta: { viewKey: 'equipment_orders' },
       },
       {
+        path: 'dokumenti',
+        name: 'documents',
+        component: () => import('pages/DocumentsPage.vue'),
+        meta: { viewKey: 'documents' },
+      },
+      {
         path: 'profil',
         name: 'profile',
         component: () => import('pages/ProfilePage.vue'),

@@ -100,6 +100,9 @@ export default {
     availabilityExternal: 'Zunanji sodelavec',
     statusAllDay: 'Cel dan',
   },
+  documents: {
+    title: 'Dokumenti', categories: 'Kategorije', newCategory: 'Nova kategorija', renameCategory: 'Preimenuj kategorijo', deleteCategory: 'Izbriši kategorijo', deleteCategoryConfirm: 'Ali želite izbrisati kategorijo in vse njene priponke?', attachments: 'Priponke', noAttachments: 'V tej kategoriji še ni priponk.', dropFiles: 'Datoteke spustite sem', chooseFiles: 'Izberi datoteke', editorTitle: 'Naslov dokumenta', edit: 'Uredi', save: 'Shrani', cancel: 'Prekliči', saved: 'Dokument je bil posodobljen.', saveFailed: 'Shranjevanje dokumenta ni uspelo.', history: 'Zgodovina revizij', lastUpdatedBy: 'Nazadnje posodobil {author} · {date}', renameFile: 'Preimenuj datoteko', deleteFile: 'Izbriši datoteko', uploadFailed: 'Nalaganje datoteke {name} ni uspelo.', categoryFailed: 'Kategorije ni bilo mogoče ustvariti.',
+  },
   messaging: {
     title: 'Obveščanje',
     lead: 'Ustvarjanje seznamov prejemnikov in priprava sporočil za e-pošto ali SMS.',
