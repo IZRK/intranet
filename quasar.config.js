@@ -44,7 +44,7 @@ export default defineConfig((ctx) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      publicPath: '/intranet/',
+      publicPath: '/',
       // analyze: true,
       env: {
         BUILD_VERSION: process.env.npm_package_version,

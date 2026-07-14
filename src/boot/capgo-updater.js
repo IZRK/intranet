@@ -3,8 +3,8 @@ import axios from 'axios'
 import { Capacitor } from '@capacitor/core'
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
 
-const VERSION_URL = 'https://izrk.github.io/intranet/version.txt'
-const BUNDLE_URL = 'https://izrk.github.io/intranet/www.zip'
+const VERSION_URL = 'https://intranet.izrk.zrc-sazu.si/version.txt'
+const BUNDLE_URL = 'https://intranet.izrk.zrc-sazu.si/www.zip'
 
 function withCacheBust(url) {
   const nextUrl = new URL(url)
