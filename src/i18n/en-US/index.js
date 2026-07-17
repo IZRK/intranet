@@ -97,6 +97,8 @@ export default {
     availabilityAway: 'Away',
     availabilityUnknown: 'Unknown',
     availabilityExternal: 'External collaborator',
+    availabilityFiveHoursWeekly: '5 hours per week',
+    availabilityOccasional: 'Occasionally',
     statusAllDay: 'All day',
   },
   documents: {

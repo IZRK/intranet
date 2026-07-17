@@ -98,6 +98,8 @@ export default {
     availabilityAway: 'Odsoten',
     availabilityUnknown: 'Neznano',
     availabilityExternal: 'Zunanji sodelavec',
+    availabilityFiveHoursWeekly: '5 ur na teden',
+    availabilityOccasional: 'Občasno',
     statusAllDay: 'Cel dan',
   },
   documents: {

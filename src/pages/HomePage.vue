@@ -509,7 +509,7 @@ export default defineComponent({
       }).format(new Date(value.replace(' ', 'T')))
     },
     statusShortLabel(row) {
-      if (this.isZanKafol(row)) {
+      if (this.isExternalCollaborator(row)) {
         return ''
       }
       if (this.isFinishedWork(row)) {
@@ -522,13 +522,21 @@ export default defineComponent({
       return row.status_code
     },
     statusEmoji(row) {
-      return this.isZanKafol(row) ? '🦅' : row.status_emoji
+      if (this.isZanKafol(row)) return '🦅'
+      if (this.isFranjoDrole(row)) return '🔧'
+      return row.status_emoji
     },
     longStatusLabel(row) {
-      return this.isZanKafol(row) ? this.$t('home.availabilityExternal') : row.status_label
+      return this.isExternalCollaborator(row) ? this.$t('home.availabilityExternal') : row.status_label
     },
     isZanKafol(row) {
       return Number(row.user_id) === 2
+    },
+    isFranjoDrole(row) {
+      return Number(row.user_id) === 34
+    },
+    isExternalCollaborator(row) {
+      return this.isZanKafol(row) || this.isFranjoDrole(row)
     },
     isFinishedWork(row) {
       return row.status_code === 'FINISHED_WORK' || row.status_group === 'finished_work'
@@ -543,6 +551,9 @@ export default defineComponent({
       return this.isFinishedWork(row) ? row.ended_at : row.started_at
     },
     attendanceTime(row) {
+      if (this.isFranjoDrole(row)) {
+        return this.$t('home.availabilityFiveHoursWeekly')
+      }
       return this.formatTime(this.attendanceTimeValue(row))
     },
     attendanceTimeSortValue(row) {
@@ -559,7 +570,7 @@ export default defineComponent({
       return Number.isFinite(timestamp) ? timestamp : Number.MAX_SAFE_INTEGER
     },
     availabilityState(row) {
-      if (this.isZanKafol(row)) return 'external'
+      if (this.isExternalCollaborator(row)) return 'external'
       if (['office', 'home', 'business_trip'].includes(row.status_group)) return 'present'
       if (['leave', 'sick_leave', 'finished_work'].includes(row.status_group)) return 'away'
       return 'unknown'
@@ -575,6 +586,7 @@ export default defineComponent({
       return ranks[this.availabilityState(row)] || ranks.unknown
     },
     availabilityLabel(row) {
+      if (this.isFranjoDrole(row)) return this.$t('home.availabilityOccasional')
       const state = this.availabilityState(row)
       if (state === 'present') return this.$t('home.availabilityPresent')
       if (state === 'away') return this.$t('home.availabilityAway')
