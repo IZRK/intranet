@@ -167,6 +167,12 @@
             hide-pagination
             class="kadris-status-table"
           >
+            <template #header-cell-status_label="props">
+              <q-th :props="props">
+                <span class="q-sr-only">{{ $t('home.statusLong') }}</span>
+              </q-th>
+            </template>
+
             <template #body-cell-user_name="props">
               <q-td :props="props">
                 <span class="kadris-cell-text">{{ displayUserName(props.row) }}</span>
@@ -175,9 +181,11 @@
 
             <template #body-cell-status_label="props">
               <q-td :props="props">
-                <q-badge :class="`availability-badge availability-${availabilityState(props.row)}`" rounded>
-                  {{ longStatusLabel(props.row) }}
-                </q-badge>
+                <span
+                  :class="`availability-semaphore availability-${availabilityState(props.row)}`"
+                  role="img"
+                  :aria-label="longStatusLabel(props.row)"
+                ></span>
               </q-td>
             </template>
           </q-table>
@@ -310,8 +318,8 @@ export default defineComponent({
   computed: {
     statusColumns() {
       return [
+        { name: 'status_label', label: '', field: 'status_label', align: 'center' },
         { name: 'user_name', label: this.$t('home.statusUser'), field: this.displayUserName, align: 'left', sortable: true },
-        { name: 'status_label', label: this.$t('home.statusLong'), field: 'status_label', align: 'left', sortable: true },
       ]
     },
     bulletinMeta() {
