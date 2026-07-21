@@ -169,35 +169,14 @@
           >
             <template #body-cell-user_name="props">
               <q-td :props="props">
-                <span class="kadris-cell-text">{{ props.row.user_name }}</span>
-              </q-td>
-            </template>
-
-            <template #body-cell-status_short="props">
-              <q-td :props="props">
-                <span class="kadris-status-label">
-                  <span class="kadris-status-emoji" aria-hidden="true">{{ statusEmoji(props.row) }}</span>
-                  <span v-if="statusShortLabel(props.row)">{{ statusShortLabel(props.row) }}</span>
-                </span>
+                <span class="kadris-cell-text">{{ displayUserName(props.row) }}</span>
               </q-td>
             </template>
 
             <template #body-cell-status_label="props">
               <q-td :props="props">
-                <span class="kadris-cell-text">{{ longStatusLabel(props.row) }}</span>
-              </q-td>
-            </template>
-
-            <template #body-cell-started_at="props">
-              <q-td :props="props">
-                <span class="kadris-cell-text">{{ attendanceTime(props.row) || $t('home.statusAllDay') }}</span>
-              </q-td>
-            </template>
-
-            <template #body-cell-availability="props">
-              <q-td :props="props">
                 <q-badge :class="`availability-badge availability-${availabilityState(props.row)}`" rounded>
-                  {{ availabilityLabel(props.row) }}
+                  {{ longStatusLabel(props.row) }}
                 </q-badge>
               </q-td>
             </template>
@@ -331,28 +310,8 @@ export default defineComponent({
   computed: {
     statusColumns() {
       return [
-        { name: 'user_name', label: this.$t('home.statusUser'), field: 'user_name', align: 'left', sortable: true },
-        { name: 'status_short', label: this.$t('home.statusShort'), field: 'status_code', align: 'left', sortable: true },
+        { name: 'user_name', label: this.$t('home.statusUser'), field: this.displayUserName, align: 'left', sortable: true },
         { name: 'status_label', label: this.$t('home.statusLong'), field: 'status_label', align: 'left', sortable: true },
-        {
-          name: 'started_at',
-          label: this.$t('home.statusStart'),
-          field: this.attendanceTimeValue,
-          align: 'left',
-          sortable: true,
-          sort: (left, right, rowLeft, rowRight) => this.attendanceTimeSortValue(rowLeft) - this.attendanceTimeSortValue(rowRight),
-        },
-        {
-          name: 'availability',
-          label: this.$t('home.statusAvailability'),
-          field: this.availabilityState,
-          align: 'left',
-          sortable: true,
-          sort: (left, right, rowLeft, rowRight) => {
-            const diff = this.availabilitySortValue(rowLeft) - this.availabilitySortValue(rowRight)
-            return diff || String(rowLeft.user_name || '').localeCompare(String(rowRight.user_name || ''), this.$i18n.locale)
-          },
-        },
       ]
     },
     bulletinMeta() {
@@ -508,23 +467,9 @@ export default defineComponent({
         timeStyle: 'short',
       }).format(new Date(value.replace(' ', 'T')))
     },
-    statusShortLabel(row) {
-      if (this.isExternalCollaborator(row)) {
-        return ''
-      }
-      if (this.isFinishedWork(row)) {
-        return ''
-      }
-      if (!row.status_code || row.status_code === 'NO_DATA') {
-        return this.$t('home.statusShortUnknown')
-      }
-
-      return row.status_code
-    },
-    statusEmoji(row) {
-      if (this.isZanKafol(row)) return '🦅'
-      if (this.isFranjoDrole(row)) return '🔧'
-      return row.status_emoji
+    displayUserName(row) {
+      const name = [row.last_name, row.first_name].map((part) => String(part || '').trim()).filter(Boolean).join(' ')
+      return name || row.user_name || row.kadris_name || ''
     },
     longStatusLabel(row) {
       return this.isExternalCollaborator(row) ? this.$t('home.availabilityExternal') : row.status_label
@@ -538,70 +483,11 @@ export default defineComponent({
     isExternalCollaborator(row) {
       return this.isZanKafol(row) || this.isFranjoDrole(row)
     },
-    isFinishedWork(row) {
-      return row.status_code === 'FINISHED_WORK' || row.status_group === 'finished_work'
-    },
-    isFullDayAbsence(row) {
-      return ['leave', 'sick_leave'].includes(row.status_group)
-    },
-    attendanceTimeValue(row) {
-      if (this.isFullDayAbsence(row)) {
-        return null
-      }
-      return this.isFinishedWork(row) ? row.ended_at : row.started_at
-    },
-    attendanceTime(row) {
-      if (this.isFranjoDrole(row)) {
-        return this.$t('home.availabilityFiveHoursWeekly')
-      }
-      return this.formatTime(this.attendanceTimeValue(row))
-    },
-    attendanceTimeSortValue(row) {
-      if (this.isFullDayAbsence(row)) {
-        return 0
-      }
-
-      const value = this.attendanceTimeValue(row)
-      if (!value) {
-        return Number.MAX_SAFE_INTEGER
-      }
-
-      const timestamp = new Date(value.replace(' ', 'T')).getTime()
-      return Number.isFinite(timestamp) ? timestamp : Number.MAX_SAFE_INTEGER
-    },
     availabilityState(row) {
       if (this.isExternalCollaborator(row)) return 'external'
       if (['office', 'home', 'business_trip'].includes(row.status_group)) return 'present'
       if (['leave', 'sick_leave', 'finished_work'].includes(row.status_group)) return 'away'
       return 'unknown'
-    },
-    availabilitySortValue(row) {
-      const ranks = {
-        present: 1,
-        external: 2,
-        away: 3,
-        unknown: 4,
-      }
-
-      return ranks[this.availabilityState(row)] || ranks.unknown
-    },
-    availabilityLabel(row) {
-      if (this.isFranjoDrole(row)) return this.$t('home.availabilityOccasional')
-      const state = this.availabilityState(row)
-      if (state === 'present') return this.$t('home.availabilityPresent')
-      if (state === 'away') return this.$t('home.availabilityAway')
-      if (state === 'external') return this.$t('home.omnipresent')
-      return this.$t('home.availabilityUnknown')
-    },
-    formatTime(value) {
-      if (!value) {
-        return ''
-      }
-
-      return new Intl.DateTimeFormat(this.$i18n.locale, {
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(new Date(value.replace(' ', 'T')))
     },
     diffRows(item) {
       return buildDiffRows(item.body, item.previous_body)
