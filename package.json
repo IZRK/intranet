@@ -13,9 +13,9 @@
     "android": "quasar build -m capacitor -T android --skip-pkg"
   },
   "dependencies": {
-    "@capacitor/app": "^7.1.2",
-    "@capacitor/core": "^7.6.0",
-    "@capgo/capacitor-updater": "^7.43.3",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.4.2",
+    "@capgo/capacitor-updater": "^8.51.2",
     "@quasar/extras": "^1.16.4",
     "@quasar/quasar-ui-qcalendar": "^4.1.2",
     "axios": "^1.8.4",
@@ -28,7 +28,7 @@
   "devDependencies": {
     "@eslint/js": "^9.14.0",
     "@intlify/unplugin-vue-i18n": "^4.0.0",
-    "@quasar/app-vite": "^2.1.0",
+    "@quasar/app-vite": "2.4.1",
     "@vue/eslint-config-prettier": "^10.1.0",
     "autoprefixer": "^10.4.2",
     "eslint": "^9.14.0",
@@ -36,11 +36,12 @@
     "globals": "^16.4.0",
     "postcss": "^8.4.14",
     "prettier": "^3.3.3",
+    "vite": "^7.3.6",
     "vite-plugin-checker": "^0.11.0",
     "vue-eslint-parser": "^10.2.0"
   },
   "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20",
+    "node": "^28 || ^26 || ^24 || ^22",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1",
     "pnpm": ">= 10.0.0"
