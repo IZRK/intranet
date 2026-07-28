@@ -493,6 +493,7 @@ export default defineComponent({
     },
     availabilityState(row) {
       if (this.isExternalCollaborator(row)) return 'external'
+      if (row.status_code === 'KPU') return 'away'
       if (['office', 'home', 'business_trip'].includes(row.status_group)) return 'present'
       if (['leave', 'sick_leave', 'finished_work'].includes(row.status_group)) return 'away'
       return 'unknown'
