@@ -947,6 +947,11 @@ body {
   border-color: color-mix(in srgb, var(--q-positive) 70%, #14351d);
 }
 
+.availability-home {
+  background: var(--q-info);
+  border-color: color-mix(in srgb, var(--q-info) 70%, #12385d);
+}
+
 .availability-away {
   background: var(--q-negative);
   border-color: color-mix(in srgb, var(--q-negative) 70%, #4c1111);
@@ -958,8 +963,8 @@ body {
 }
 
 .availability-external {
-  background: var(--q-info);
-  border-color: color-mix(in srgb, var(--q-info) 70%, #12385d);
+  background: #8b5cf6;
+  border-color: color-mix(in srgb, #8b5cf6 70%, #3b0764);
 }
 
 @media (max-width: 900px) {
