@@ -101,6 +101,7 @@ export default {
     availabilityExternal: 'Zunanji sodelavec',
     availabilityOffice: 'Redno delo',
     availabilityHome: 'Delo na domu',
+    availabilityBusinessTrip: 'Službena pot',
     availabilityAwayTooltip: 'Odsotnost',
     availabilityNoKadrisData: 'Ni podatka v Kadrisu',
     availabilityFiveHoursWeekly: '5 ur na teden',

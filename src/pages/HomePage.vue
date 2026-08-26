@@ -165,6 +165,10 @@
               {{ $t('home.availabilityHome') }}
             </span>
             <span class="kadris-status-legend-item">
+              <span class="availability-semaphore availability-business-trip" aria-hidden="true"></span>
+              {{ $t('home.availabilityBusinessTrip') }}
+            </span>
+            <span class="kadris-status-legend-item">
               <span class="availability-semaphore availability-away" aria-hidden="true"></span>
               {{ $t('home.availabilityAway') }}
             </span>
@@ -513,6 +517,7 @@ export default defineComponent({
       const state = this.availabilityState(row)
       if (state === 'external') return this.$t('home.availabilityExternal')
       if (state === 'home') return this.$t('home.availabilityHome')
+      if (state === 'business-trip') return this.$t('home.availabilityBusinessTrip')
       if (state === 'present') return this.$t('home.availabilityOffice')
       if (state === 'away') return this.$t('home.availabilityAwayTooltip')
       return this.$t('home.availabilityNoKadrisData')
@@ -529,6 +534,7 @@ export default defineComponent({
     availabilityState(row) {
       if (this.isExternalCollaborator(row)) return 'external'
       if (row.status_code === 'KPU') return 'away'
+      if (row.status_code === 'S') return 'business-trip'
       if (row.status_group === 'home') return 'home'
       if (['office', 'business_trip'].includes(row.status_group)) return 'present'
       if (['leave', 'sick_leave', 'finished_work'].includes(row.status_group)) return 'away'

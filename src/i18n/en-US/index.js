@@ -100,6 +100,7 @@ export default {
     availabilityExternal: 'External collaborator',
     availabilityOffice: 'Working in the office',
     availabilityHome: 'Working from home',
+    availabilityBusinessTrip: 'Business trip',
     availabilityAwayTooltip: 'Away',
     availabilityNoKadrisData: 'No Kadris data',
     availabilityFiveHoursWeekly: '5 hours per week',
