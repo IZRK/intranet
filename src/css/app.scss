@@ -886,6 +886,43 @@ body {
   gap: 16px;
 }
 
+.kadris-status-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 12px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-top: 0;
+  padding-bottom: 8px;
+  color: var(--app-muted);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.kadris-status-legend-title,
+.kadris-status-legend-item {
+  flex: 0 0 auto;
+}
+
+.kadris-status-legend-title {
+  color: var(--app-text);
+  font-weight: 700;
+}
+
+.kadris-status-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.kadris-status-legend .availability-semaphore {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-width: 1px;
+}
+
 .kadris-status-table {
   color: var(--app-text);
 }

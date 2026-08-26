@@ -92,6 +92,7 @@ export default {
     statusLong: 'Status',
     statusStart: 'Od',
     statusAvailability: 'Prisotnost',
+    availabilityLegend: 'Legenda prisotnosti',
     statusShortUnknown: 'Neznano',
     omnipresent: 'Omniprisoten',
     availabilityPresent: 'Prisoten',

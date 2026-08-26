@@ -150,6 +150,34 @@
             </q-btn>
           </q-card-section>
 
+          <q-card-section
+            class="kadris-status-legend"
+            role="group"
+            :aria-label="$t('home.availabilityLegend')"
+          >
+            <span class="kadris-status-legend-title">{{ $t('home.availabilityLegend') }}</span>
+            <span class="kadris-status-legend-item">
+              <span class="availability-semaphore availability-present" aria-hidden="true"></span>
+              {{ $t('home.availabilityPresent') }}
+            </span>
+            <span class="kadris-status-legend-item">
+              <span class="availability-semaphore availability-home" aria-hidden="true"></span>
+              {{ $t('home.availabilityHome') }}
+            </span>
+            <span class="kadris-status-legend-item">
+              <span class="availability-semaphore availability-away" aria-hidden="true"></span>
+              {{ $t('home.availabilityAway') }}
+            </span>
+            <span class="kadris-status-legend-item">
+              <span class="availability-semaphore availability-unknown" aria-hidden="true"></span>
+              {{ $t('home.availabilityUnknown') }}
+            </span>
+            <span class="kadris-status-legend-item">
+              <span class="availability-semaphore availability-external" aria-hidden="true"></span>
+              {{ $t('home.availabilityExternal') }}
+            </span>
+          </q-card-section>
+
           <q-card-section v-if="!bulletin.kadrisLoading && !bulletin.kadrisStatuses.length">
             <q-banner rounded class="banner-info">
               {{ $t('home.noStatuses') }}

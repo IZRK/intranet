@@ -91,6 +91,7 @@ export default {
     statusLong: 'Status',
     statusStart: 'From',
     statusAvailability: 'Presence',
+    availabilityLegend: 'Presence legend',
     statusShortUnknown: 'Unknown',
     omnipresent: 'Omnipresent',
     availabilityPresent: 'Present',
