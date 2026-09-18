@@ -602,6 +602,7 @@ import { useReservationsStore } from 'stores/reservations-store'
 import { AUTO_REFRESH_INTERVAL_MS, buildSnapshot } from 'src/utils/auto-refresh'
 
 const VISIBLE_CALENDAR_STORAGE_KEY = 'izrk.reservations.visible-calendars'
+const KNOWN_CALENDAR_STORAGE_KEY = 'izrk.reservations.known-calendars'
 const Q_DATE_LOCALES = {
   'en-US': {
     ...quasarLangEnUs.date,
@@ -976,10 +977,27 @@ export default defineComponent({
         return false
       }
     },
+    loadKnownCalendarIds() {
+      const stored = window.localStorage.getItem(KNOWN_CALENDAR_STORAGE_KEY)
+      if (!stored) {
+        return null
+      }
+
+      try {
+        const parsed = JSON.parse(stored)
+        return Array.isArray(parsed) ? this.normalizeVisibleCalendarIds(parsed) : null
+      } catch {
+        return null
+      }
+    },
     setVisibleCalendarIds(ids) {
       const normalized = this.normalizeVisibleCalendarIds(ids)
       this.visibleCalendarIds = normalized
       window.localStorage.setItem(VISIBLE_CALENDAR_STORAGE_KEY, JSON.stringify(normalized))
+    },
+    setKnownCalendarIds(ids) {
+      const normalized = this.normalizeVisibleCalendarIds(ids)
+      window.localStorage.setItem(KNOWN_CALENDAR_STORAGE_KEY, JSON.stringify(normalized))
     },
     async loadOverview({ silent = false } = {}) {
       try {
@@ -1066,11 +1084,20 @@ export default defineComponent({
       if (!this.visibleCalendarSelectionLoaded) {
         this.visibleCalendarSelectionLoaded = true
         this.setVisibleCalendarIds(ids)
+        this.setKnownCalendarIds(ids)
         return
       }
 
+      const knownIds = this.loadKnownCalendarIds()
+      const known = new Set(knownIds || this.visibleCalendarIds)
       const current = new Set(this.visibleCalendarIds)
+
+      // Keep the user's existing choices, but make calendars added since the
+      // last visit visible by default. The fallback also migrates old clients
+      // that predate the known-calendar list.
+      ids.filter((id) => !known.has(id)).forEach((id) => current.add(id))
       this.setVisibleCalendarIds(ids.filter((id) => current.has(id)))
+      this.setKnownCalendarIds(ids)
     },
     syncExpandedGroups() {
       const nextState = { ...this.expandedGroups }
@@ -1463,10 +1490,13 @@ export default defineComponent({
     },
     async saveCalendar() {
       try {
+        const isCreatingCalendar = !this.editingCalendarId
         const calendar = this.editingCalendarId
           ? await this.reservations.updateCalendar({ id: this.editingCalendarId, ...this.calendarForm })
           : await this.reservations.createCalendar(this.calendarForm)
-        this.setVisibleCalendarIds([...this.visibleCalendarIds, calendar.id])
+        if (isCreatingCalendar) {
+          this.setVisibleCalendarIds([...this.visibleCalendarIds, calendar.id])
+        }
         this.calendarForm = {
           name: '',
           group_id: null,
