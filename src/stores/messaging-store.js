@@ -65,7 +65,16 @@ export const useMessagingStore = defineStore('messaging', {
     },
 
     async send(payload) {
-      const { data } = await api.post('messaging/send', payload)
+      const { attachments = [], ...message } = payload
+      let body = message
+      let config = {}
+      if (message.method === 'email' && attachments.length) {
+        body = new FormData()
+        body.append('payload', JSON.stringify(message))
+        attachments.forEach((file) => body.append('attachments[]', file))
+        config = { headers: { 'Content-Type': 'multipart/form-data' } }
+      }
+      const { data } = await api.post('messaging/send', body, config)
       return data
     },
   },

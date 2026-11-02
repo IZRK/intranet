@@ -157,6 +157,8 @@ export default {
     noRecipientsListed: 'No recipients listed.',
     recipientsCopied: 'Recipient list copied.',
     recipientsCopyFailed: 'Copy failed.',
+    attachments: 'Attachments',
+    attachmentsHint: 'Up to 10 files, 10 MB total. Email only.',
     subject: 'Subject',
     smsMessage: 'SMS message',
     saveMessage: 'Send message',

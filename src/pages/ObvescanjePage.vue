@@ -225,6 +225,22 @@
                 outlined
                 :label="$t('messaging.subject')"
               />
+              <q-file
+                v-if="form.method === 'email'"
+                v-model="attachments"
+                outlined
+                multiple
+                append
+                use-chips
+                clearable
+                :max-files="10"
+                :max-total-size="10 * 1024 * 1024"
+                :label="$t('messaging.attachments')"
+                :hint="$t('messaging.attachmentsHint')"
+                @rejected="attachmentsRejected"
+              >
+                <template #prepend><q-icon name="attach_file" /></template>
+              </q-file>
               <q-editor
                 v-if="form.method === 'email'"
                 v-model="form.message"
@@ -385,6 +401,7 @@ export default defineComponent({
       auth: useAuthStore(),
       messaging: useMessagingStore(),
       delivery: null,
+      attachments: [],
       showGroupsPanel: false,
       showGroupEditor: false,
       editingGroupId: null,
@@ -740,6 +757,7 @@ export default defineComponent({
       this.form.subject = item.subject || ''
       this.form.message = item.message || ''
       this.form.cc = []
+      this.attachments = []
 
       document.getElementById('message-composer')?.scrollIntoView({
         behavior: 'smooth',
@@ -765,9 +783,13 @@ export default defineComponent({
 
       return recipients.join(', ')
     },
+    attachmentsRejected() {
+      Notify.create({ type: 'negative', message: i18n.global.t('messaging.attachmentsHint') })
+    },
     async sendMessage() {
       try {
         const { delivery } = await this.messaging.send({
+          attachments: this.form.method === 'email' ? this.attachments || [] : [],
           method: this.form.method,
           group_id: this.form.groupId,
           subject: this.form.subject,
@@ -784,6 +806,7 @@ export default defineComponent({
           }),
         })
         this.delivery = delivery
+        this.attachments = []
         await this.messaging.loadHistory()
         Notify.create({ type: 'positive', message: i18n.global.t('messaging.messageSaved') })
       } catch {

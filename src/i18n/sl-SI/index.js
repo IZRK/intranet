@@ -158,6 +158,8 @@ export default {
     noRecipientsListed: 'Ni prikazanih prejemnikov.',
     recipientsCopied: 'Seznam prejemnikov je bil kopiran.',
     recipientsCopyFailed: 'Kopiranje ni uspelo.',
+    attachments: 'Priponke',
+    attachmentsHint: 'Do 10 datotek, skupaj največ 10 MB. Samo za e-pošto.',
     subject: 'Zadeva',
     smsMessage: 'SMS sporočilo',
     saveMessage: 'Pošlji sporočilo',
