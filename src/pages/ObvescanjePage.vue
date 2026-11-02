@@ -228,6 +228,7 @@
               <q-file
                 v-if="form.method === 'email'"
                 v-model="attachments"
+                class="message-attachments"
                 outlined
                 multiple
                 append
@@ -818,6 +819,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Keep QFile's invisible input out of the selected-file chip layout. */
+.message-attachments :deep(input.q-field__input[type="file"]) {
+  position: absolute;
+}
+
 .method-tabs-wrap {
   display: flex;
   flex-direction: column;
