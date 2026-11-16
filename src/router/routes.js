@@ -34,6 +34,12 @@ const routes = [
         meta: { viewKey: 'home' },
       },
       {
+        path: 'ankete/:id(\\d+)',
+        name: 'poll',
+        component: () => import('pages/PollPage.vue'),
+        meta: { viewKey: 'polls' },
+      },
+      {
         path: 'obvescanje',
         name: 'obvescanje',
         component: () => import('pages/ObvescanjePage.vue'),

@@ -130,6 +130,7 @@
       </section>
 
       <section class="home-grid-column">
+        <PollsCard class="q-mb-md" />
         <q-card flat bordered class="panel-card kadris-status-card">
           <q-card-section class="kadris-status-toolbar">
             <div>
@@ -231,6 +232,7 @@
 
 <script>
 import { defineComponent } from 'vue'
+import PollsCard from 'components/PollsCard.vue'
 import { Notify } from 'quasar'
 import { i18n } from 'boot/i18n'
 import { useBulletinStore } from 'stores/bulletin-store'
@@ -303,6 +305,7 @@ function buildDiffRows(currentHtml, previousHtml) {
 }
 
 export default defineComponent({
+  components: { PollsCard },
   name: 'HomePage',
   data() {
     return {

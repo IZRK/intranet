@@ -113,7 +113,8 @@ export default defineComponent({
       try {
         await this.auth.login({ email: this.email, pass: this.password })
         Notify.create({ type: 'positive', message: i18n.global.t('auth.loginSuccess') })
-        this.$router.push('/')
+        const redirect = this.$route.query.redirect
+        this.$router.push(typeof redirect === 'string' && this.$router.resolve(redirect).name === 'poll' ? redirect : '/')
       } catch {
         Notify.create({ type: 'negative', message: i18n.global.t('auth.loginFailed') })
       }

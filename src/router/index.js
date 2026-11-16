@@ -50,7 +50,7 @@ export default defineRouter(function () {
     }
 
     if (to.meta.requiresAuth && !auth.isAuthenticated) {
-      return { name: 'login' }
+      return { name: 'login', query: to.name === 'poll' ? { redirect: to.fullPath } : {} }
     }
 
     if (to.meta.adminOnly && !auth.isAdmin) {
