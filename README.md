@@ -1,6 +1,6 @@
 # IZRK Intranet Frontend
 
-Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 4, and a shared dual-theme visual system tuned for the IZRK intranet workflows. It ships as both a web app and a Capacitor-based mobile app.
+Quasar 2 + Vite frontend for the IZRK intranet. The app uses Vue 3, Pinia, Vue Router 5, and a shared dual-theme visual system tuned for the IZRK intranet workflows. It ships as both a web app and a Capacitor-based mobile app.
 
 <p>
   <a href="https://apps.apple.com/us/app/izrk-intranet/id6760788413" target="_blank" rel="noopener noreferrer">
@@ -75,3 +75,9 @@ The frontend calls the API through the server base URL, without hardcoding `inde
 ```bash
 npm run android
 ```
+
+## Dependency security maintenance
+
+The frontend uses Quasar CLI (`@quasar/app-vite`) 3 and Vite 8. Use Node 22.22+ (or a newer supported Node release). CLI v3 imports use `#q-app`; the configuration retains existing source aliases and enables the Vue Options API. Client build constants use `import.meta.env`, including `VITE_BUILD_VERSION` for mobile update checks.
+
+Install from the lockfiles with `npm ci` in this folder and `src-capacitor`. Check both dependency trees with `npm audit` and `npm --prefix src-capacitor audit`. The scoped `@typescript-eslint/typescript-estree` override selects patched minimatch 11 because its current release still requests vulnerable minimatch 10; remove it once upstream adopts a patched version. Validate upgrades with `npm run build` and ESLint before release.

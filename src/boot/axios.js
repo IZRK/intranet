@@ -1,4 +1,4 @@
-import { defineBoot } from '#q-app/wrappers'
+import { defineBoot } from '#q-app'
 import axios from 'axios'
 
 const API_BASE_URL = 'https://web.izrk.zrc-sazu.si'

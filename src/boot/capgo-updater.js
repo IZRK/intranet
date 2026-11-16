@@ -1,4 +1,4 @@
-import { defineBoot } from '#q-app/wrappers'
+import { defineBoot } from '#q-app'
 import axios from 'axios'
 import { Capacitor } from '@capacitor/core'
 import { CapacitorUpdater } from '@capgo/capacitor-updater'
@@ -57,7 +57,7 @@ export default defineBoot(async () => {
     console.info('Capgo updater notifyAppReady skipped', error?.message || error)
   })
 
-  const localVersion = process.env.BUILD_VERSION
+  const localVersion = import.meta.env.VITE_BUILD_VERSION
 
   try {
     const response = await axios.get(withCacheBust(VERSION_URL), {
