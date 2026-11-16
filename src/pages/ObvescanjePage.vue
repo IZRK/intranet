@@ -807,6 +807,13 @@ export default defineComponent({
           }),
         })
         this.delivery = delivery
+        this.form = {
+          method: this.form.method,
+          groupId: null,
+          subject: '',
+          message: '',
+          cc: [],
+        }
         this.attachments = []
         await this.messaging.loadHistory()
         Notify.create({ type: 'positive', message: i18n.global.t('messaging.messageSaved') })
